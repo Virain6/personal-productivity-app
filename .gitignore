@@ -31,3 +31,10 @@ npm-debug.log*
 
 # Vercel
 .vercel/
+
+# Additional local outputs and SQLite journal files
+coverage/
+dist/
+/imports/
+*.sqlite-*
+*.sqlite3-*

@@ -1,0 +1,1 @@
+ALTER TABLE `time_sessions` ADD `overlap_confirmed` integer DEFAULT false NOT NULL;

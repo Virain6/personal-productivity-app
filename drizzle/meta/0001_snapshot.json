@@ -1,0 +1,510 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "1f6eadc9-a43e-40ac-9603-1c7274f0a07a",
+  "prevId": "0d4b9f40-1cce-4aef-896a-25b087fe5424",
+  "tables": {
+    "activity_completions": {
+      "name": "activity_completions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "task_id": {
+          "name": "task_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "undone_at": {
+          "name": "undone_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "one_completion": {
+          "name": "one_completion",
+          "columns": ["task_id"],
+          "isUnique": true,
+          "where": "\"activity_completions\".\"undone_at\" IS NULL"
+        }
+      },
+      "foreignKeys": {
+        "activity_completions_task_id_tasks_id_fk": {
+          "name": "activity_completions_task_id_tasks_id_fk",
+          "tableFrom": "activity_completions",
+          "tableTo": "tasks",
+          "columnsFrom": ["task_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "mutation_receipts": {
+      "name": "mutation_receipts",
+      "columns": {
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "payload": {
+          "name": "payload",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "result": {
+          "name": "result",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "time_sessions": {
+      "name": "time_sessions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "task_id": {
+          "name": "task_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ended_at": {
+          "name": "ended_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "overlap_confirmed": {
+          "name": "overlap_confirmed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "summary": {
+          "name": "summary",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        }
+      },
+      "indexes": {
+        "single_running_timer": {
+          "name": "single_running_timer",
+          "columns": ["(1)"],
+          "isUnique": true,
+          "where": "\"time_sessions\".\"ended_at\" IS NULL"
+        },
+        "session_task": {
+          "name": "session_task",
+          "columns": ["task_id"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "time_sessions_task_id_tasks_id_fk": {
+          "name": "time_sessions_task_id_tasks_id_fk",
+          "tableFrom": "time_sessions",
+          "tableTo": "tasks",
+          "columnsFrom": ["task_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "session_interval": {
+          "name": "session_interval",
+          "value": "\"time_sessions\".\"ended_at\" IS NULL OR \"time_sessions\".\"ended_at\">\"time_sessions\".\"started_at\""
+        },
+        "manual_closed": {
+          "name": "manual_closed",
+          "value": "\"time_sessions\".\"source\"='timer' OR (\"time_sessions\".\"source\"='manual' AND \"time_sessions\".\"ended_at\" IS NOT NULL)"
+        },
+        "session_summary": {
+          "name": "session_summary",
+          "value": "length(\"time_sessions\".\"summary\")<=500"
+        }
+      }
+    },
+    "settings": {
+      "name": "settings",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "timezone": {
+          "name": "timezone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "onboarding_date": {
+          "name": "onboarding_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "single_settings": {
+          "name": "single_settings",
+          "value": "\"settings\".\"id\"=1"
+        }
+      }
+    },
+    "tasks": {
+      "name": "tasks",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "template_id": {
+          "name": "template_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "occurrence_date": {
+          "name": "occurrence_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "planned_date": {
+          "name": "planned_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "mode": {
+          "name": "mode",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'flexible'"
+        },
+        "suggested_time": {
+          "name": "suggested_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "target_minutes": {
+          "name": "target_minutes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "fixed_start": {
+          "name": "fixed_start",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "fixed_end": {
+          "name": "fixed_end",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "optional": {
+          "name": "optional",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'pending'"
+        },
+        "summary": {
+          "name": "summary",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "occurrence_identity": {
+          "name": "occurrence_identity",
+          "columns": ["template_id", "occurrence_date"],
+          "isUnique": true
+        },
+        "task_day": {
+          "name": "task_day",
+          "columns": ["planned_date"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "tasks_template_id_activity_templates_id_fk": {
+          "name": "tasks_template_id_activity_templates_id_fk",
+          "tableFrom": "tasks",
+          "tableTo": "activity_templates",
+          "columnsFrom": ["template_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "task_duration": {
+          "name": "task_duration",
+          "value": "\"tasks\".\"target_minutes\">0"
+        },
+        "task_status": {
+          "name": "task_status",
+          "value": "\"tasks\".\"status\" IN ('pending','in_progress','done','skipped')"
+        },
+        "task_summary": {
+          "name": "task_summary",
+          "value": "length(\"tasks\".\"summary\")<=500"
+        },
+        "task_origin": {
+          "name": "task_origin",
+          "value": "(\"tasks\".\"template_id\" IS NULL AND \"tasks\".\"occurrence_date\" IS NULL) OR (\"tasks\".\"template_id\" IS NOT NULL AND \"tasks\".\"occurrence_date\" IS NOT NULL)"
+        },
+        "fixed_interval": {
+          "name": "fixed_interval",
+          "value": "(\"tasks\".\"mode\"='flexible' AND \"tasks\".\"fixed_start\" IS NULL AND \"tasks\".\"fixed_end\" IS NULL) OR (\"tasks\".\"mode\"='fixed' AND \"tasks\".\"fixed_start\" IS NOT NULL AND \"tasks\".\"fixed_end\">\"tasks\".\"fixed_start\")"
+        }
+      }
+    },
+    "activity_templates": {
+      "name": "activity_templates",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "weekday": {
+          "name": "weekday",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "target_minutes": {
+          "name": "target_minutes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "suggested_time": {
+          "name": "suggested_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "optional": {
+          "name": "optional",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "effective_from": {
+          "name": "effective_from",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "effective_until": {
+          "name": "effective_until",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "template_weekday": {
+          "name": "template_weekday",
+          "value": "\"activity_templates\".\"weekday\" BETWEEN 1 AND 7"
+        },
+        "template_duration": {
+          "name": "template_duration",
+          "value": "\"activity_templates\".\"target_minutes\">0"
+        }
+      }
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {
+      "single_running_timer": {
+        "columns": {
+          "(1)": {
+            "isExpression": true
+          }
+        }
+      }
+    }
+  }
+}

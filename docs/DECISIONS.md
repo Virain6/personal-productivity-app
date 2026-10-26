@@ -1,0 +1,45 @@
+# Decisions
+
+## 2026-10-24 — Limit this session to M0a initialization
+
+Decision: split the plan's M0 into M0a (starter/documentation/tooling) and M0b (minimal persistence before tasks). No database packages, schema, seeds or product features in M0a.
+Reason: the explicit initialization request is narrower than the original M0 checklist. Keep the original plan unchanged and track the difference here.
+Alternative: implement all original M0 work now; rejected because it exceeds the current request. M0 stays incomplete until both parts are verified.
+
+## 2026-10-24 — Canonical documentation lives in docs/
+
+Decision: docs/PROGRESS.md is the single progress journal, accompanied by TASKS, ARCHITECTURE and DECISIONS. Original plan references to PROGRESS.md mean this file.
+Reason: follow the requested folder organization without duplicating trackers or rewriting the user specification.
+
+## 2026-10-24 — One Next.js application; npm and Node 22
+
+Decision: Next.js App Router, React, strict TypeScript, Tailwind; npm with exact direct versions and a lockfile. Node 22 is the local runtime line. SQLite/Drizzle remains the planned persistence stack.
+Reason: matches the plan and existing local tooling, with no separate backend to maintain. Native SQLite driver compatibility is verified at M0b and again for the home-server architecture before deployment.
+Alternative: hosted database/separate API; unnecessary for this single-user app.
+
+## 2026-10-24 — Minimal local UI components
+
+Decision: semantic HTML and Tailwind with small local components, using system fonts. Do not install a component kit yet.
+Reason: no complex interaction is being implemented. Add an accessible primitive library only when a concrete feature benefits from it.
+
+## 2026-10-24 — Verification grows with behavior
+
+Decision: initialize lint/typecheck/build and formatting checks now. Introduce the test runner with the first database/domain slice; no placeholder tests or test script claiming absent coverage.
+Reason: initialization has no domain behavior. First meaningful tests must exercise migration/seed reruns and task persistence.
+
+## 2026-10-24 — Pin the compatible lint toolchain
+
+Decision: use ESLint 9.39.5 with eslint-config-next 16.4.3.
+Reason: ESLint 10 installs but the bundled import, accessibility and React plugins declare peer support only through 9; npm ls reports an invalid tree with 10. Version 9 is deprecated upstream, so track an upgrade once those plugins support 10. Do not suppress peer checks or force an invalid install. This is development tooling, not application runtime.
+
+## 2026-10-24 — Sprint 1 scope and UI primitives
+
+The latest user request authorizes phases A–F, beyond initialization. Use local Geist and Lucide; small Radix-backed dialog composition rather than a large component catalog. No suggested clock times in seeded routines. Preserve original plan; fixed events and completion event history extend its initial model.
+
+## 2026-10-26 — Sprint persistence and origin verification
+
+Use better-sqlite3/Drizzle with transactions and database constraints for single-timer and occurrence identity guarantees. Keep completion history separate from time. Reject a second running timer rather than silently switching; atomic switch and existing-log correction remain later work.
+
+Browser testing exposed Next's internal localhost URL normalization when the browser uses 127.0.0.1. Validate the actual Host and Origin pair (or explicit APP_ORIGIN), not the normalized request URL hostname. Regression tests cover foreign hosts/origins and configured proxy origins.
+
+Retry the same payload with its original mutation key after uncertain network/server failure. A fresh key after failure could duplicate saved manual logs. Browser test data uses a separate temporary database.
