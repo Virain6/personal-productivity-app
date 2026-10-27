@@ -33,6 +33,7 @@ export function mutate(store: Store, input: unknown, now = Date.now()) {
       const timezone = store.db.select().from(settings).get()!.timezone;
       let id: string | undefined;
       if (
+        c.action === "habitQuick" ||
         c.action === "habitCreate" ||
         c.action === "habitEdit" ||
         c.action === "habitArchive" ||

@@ -1,4 +1,14 @@
 import test from "node:test";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { CalendarHabit } from "../src/features/habits/calendar-habit";
+import { TaskCard } from "../src/features/home/task-card";
+import {
+  quickHabitRecord,
+  habitQuickStep,
+  type HabitQuickMode,
+} from "../src/lib/habit-quick";
+import { sendCommand } from "../src/lib/api";
 import assert from "node:assert/strict";
 import {
   mkdtempSync,
@@ -869,6 +879,291 @@ test("calendar workout move overrides future schedule without advancing or erasi
     const future = getHabitCalendar(s, "2026-11-02", "2026-11-08", now);
     assert.equal(future.days.flatMap((d) => d.habits).length, 0);
     assert.equal(view(s, id).nextIndex, 0);
+  } finally {
+    s.sqlite.close();
+  }
+});
+
+function quick(
+  s: Store,
+  id: string,
+  mode: HabitQuickMode,
+  day = date,
+  time = now,
+) {
+  const h = view(s, id, day, time);
+  return {
+    action: "habitQuick",
+    id,
+    version: h.version,
+    date: day,
+    revisionId: h.revisionId,
+    entryVersion: h.record?.version ?? 0,
+    mode,
+  };
+}
+test("quick binary completion/undo and negative confirmation target the displayed date", () => {
+  const s = setup();
+  try {
+    const id = create(s);
+    command(s, quick(s, id, "toggle"));
+    assert.equal(view(s, id).record?.state, "done");
+    command(s, quick(s, id, "toggle"));
+    assert.equal(view(s, id).record?.state, "notDone");
+    command(s, quick(s, id, "toggle", date, now + 86400000), now + 86400000);
+    assert.equal(view(s, id).record?.state, "done");
+    assert.equal(view(s, id, "2026-10-27", now + 86400000).record, null);
+    assert.throws(
+      () => command(s, quick(s, id, "toggle", "2026-10-27")),
+      /details/,
+    );
+    for (const direction of ["limit", "avoid"] as const) {
+      const negative = create(s, { direction, target: 0 });
+      command(s, quick(s, negative, "toggle"));
+      assert.equal(
+        habitOutcome(view(s, negative).dateConfig!, view(s, negative).record),
+        "met",
+      );
+      command(s, quick(s, negative, "toggle"));
+      assert.equal(
+        habitOutcome(view(s, negative).dateConfig!, view(s, negative).record),
+        "unlogged",
+      );
+    }
+  } finally {
+    s.sqlite.close();
+  }
+});
+test("quantity quick actions require an observed total, respect scaled steps and prevent double increments", () => {
+  const s = setup();
+  try {
+    const id = create(s, {
+      kind: "quantity",
+      unit: "drinks",
+      direction: "limit",
+      target: 0,
+      quickStep: 0.1,
+    });
+    assert.throws(() => command(s, quick(s, id, "increment")), /details/);
+    assert.equal(view(s, id).record, null);
+    command(s, quick(s, id, "zero"));
+    const request = {
+      operationKey: crypto.randomUUID(),
+      command: quick(s, id, "increment"),
+    };
+    mutate(s, request, now);
+    mutate(s, request, now);
+    assert.equal(view(s, id).record?.quantityMilli, 100);
+    assert.throws(() => command(s, request.command), /changed/);
+    assert.equal(
+      habitOutcome(view(s, id).dateConfig!, view(s, id).record),
+      "exceeded",
+    );
+    command(s, quick(s, id, "decrement"));
+    assert.equal(view(s, id).record?.quantityMilli, 0);
+    assert.equal(
+      habitOutcome(view(s, id).dateConfig!, view(s, id).record),
+      "met",
+    );
+    assert.throws(() => command(s, quick(s, id, "decrement")), /details/);
+    const build = create(s, {
+      kind: "quantity",
+      unit: "pages",
+      direction: "build",
+      target: 2,
+      goal: "atLeast",
+      quickStep: 1,
+    });
+    command(s, record(s, build, { quantity: 1 }));
+    command(s, quick(s, build, "increment"));
+    assert.equal(
+      habitOutcome(view(s, build).dateConfig!, view(s, build).record),
+      "met",
+    );
+  } finally {
+    s.sqlite.close();
+  }
+});
+test("quick steps are optional and cannot cross historical units or exceed quantity bounds", () => {
+  const s = setup();
+  try {
+    for (const quickStep of [0, -1, 0.0001, Infinity])
+      assert.throws(() => create(s, { quickStep }));
+    const id = create(s, { kind: "quantity", unit: "mL", quickStep: 250 });
+    command(s, record(s, id, { quantity: 1000 }));
+    command(
+      s,
+      {
+        action: "habitEdit",
+        id,
+        version: view(s, id).version,
+        config: { ...config, kind: "quantity", unit: "L", quickStep: 0.25 },
+      },
+      now + 86400000,
+    );
+    assert.equal(habitQuickStep(view(s, id)), 250);
+    command(s, quick(s, id, "increment", date, now + 86400000), now + 86400000);
+    assert.equal(view(s, id).record?.quantityMilli, 1250000);
+    const unconfigured = create(s, { kind: "quantity", unit: "pages" });
+    command(s, record(s, unconfigured, { quantity: 1 }));
+    assert.equal(
+      quickHabitRecord(view(s, unconfigured), date, date, "increment"),
+      null,
+    );
+    const max = create(s, { kind: "quantity", unit: "mL", quickStep: 1 });
+    command(s, record(s, max, { quantity: 1_000_000_000 }));
+    assert.throws(() => command(s, quick(s, max, "increment")), /details/);
+  } finally {
+    s.sqlite.close();
+  }
+});
+test("quick workout completion explicitly advances once, rest and ambiguous history require dialog", () => {
+  const s = setup();
+  try {
+    const id = create(s, {
+      kind: "workout",
+      rotation: ["Push", "Rest", "Pull"],
+    });
+    const request = {
+      operationKey: crypto.randomUUID(),
+      command: quick(s, id, "toggle"),
+    };
+    mutate(s, request, now);
+    mutate(s, request, now);
+    assert.equal(view(s, id).record?.workout, "Push");
+    assert.equal(view(s, id).nextIndex, 1);
+    assert.throws(() => command(s, request.command), /changed/);
+    command(s, quick(s, id, "toggle"));
+    assert.equal(view(s, id).nextIndex, 0);
+    const tomorrow = now + 86400000;
+    assert.equal(
+      quickHabitRecord(
+        view(s, id, date, tomorrow),
+        date,
+        "2026-10-27",
+        "toggle",
+      ),
+      null,
+    );
+    command(s, {
+      action: "habitNext",
+      id,
+      version: view(s, id).version,
+      nextIndex: 1,
+      nextDate: null,
+    });
+    assert.equal(quickHabitRecord(view(s, id), date, date, "toggle"), null);
+    assert.throws(() => command(s, quick(s, id, "toggle")), /details/);
+    assert.equal(view(s, id).nextIndex, 1);
+    command(s, {
+      action: "habitNext",
+      id,
+      version: view(s, id).version,
+      nextIndex: 2,
+      nextDate: null,
+    });
+    command(s, quick(s, id, "toggle"));
+    command(s, {
+      action: "habitNext",
+      id,
+      version: view(s, id).version,
+      nextIndex: 1,
+      nextDate: null,
+    });
+    assert.equal(quickHabitRecord(view(s, id), date, date, "toggle"), null);
+    assert.equal(view(s, id).record?.workout, "Pull");
+  } finally {
+    s.sqlite.close();
+  }
+});
+test("quick-action retry after a lost response uses the original receipt, not a second increment", async (t) => {
+  const s = setup();
+  const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
+  Object.defineProperty(globalThis, "window", {
+    configurable: true,
+    value: new EventTarget(),
+  });
+  try {
+    const id = create(s, { kind: "quantity", unit: "pages", quickStep: 1 });
+    command(s, record(s, id, { quantity: 4 }));
+    let requests = 0;
+    const keys: string[] = [];
+    t.mock.method(
+      globalThis,
+      "fetch",
+      async (_url: unknown, options: RequestInit) => {
+        const body = JSON.parse(String(options.body));
+        keys.push(body.operationKey);
+        const result = mutate(s, body, now);
+        if (++requests === 1) throw new TypeError("Connection lost after save");
+        return Response.json(result);
+      },
+    );
+    const c = quick(s, id, "increment");
+    await assert.rejects(sendCommand(c), /Connection lost/);
+    await sendCommand(c);
+    assert.equal(keys[0], keys[1]);
+    assert.equal(view(s, id).record?.quantityMilli, 5000);
+    assert.equal(s.db.select().from(habitRecords).all().length, 1);
+  } finally {
+    if (originalWindow)
+      Object.defineProperty(globalThis, "window", originalWindow);
+    else Reflect.deleteProperty(globalThis, "window");
+    s.sqlite.close();
+  }
+});
+test("calendar renders shared success styling and separate accessible quick/detail buttons", () => {
+  const s = setup();
+  try {
+    const id = create(s, {
+      kind: "quantity",
+      unit: "drinks",
+      direction: "avoid",
+      target: 0,
+    });
+    const render = () =>
+      renderToStaticMarkup(
+        createElement(CalendarHabit, {
+          habit: view(s, id),
+          date,
+          today: date,
+          onOpen: () => {},
+        }),
+      );
+    assert.match(render(), /data-state="neutral"/);
+    assert.match(render(), /Not logged/);
+    command(s, quick(s, id, "zero"));
+    const html = render();
+    assert.match(html, /data-state="success"/);
+    assert.match(html, /bg-success\/10/);
+    assert.match(html, /Log zero for Read on 2026-10-26/);
+    assert.match(html, /Log Read for 2026-10-26/);
+    assert.doesNotMatch(
+      html,
+      /<button\b[^>]*>(?:(?!<\/button>)[\s\S])*<button\b/,
+    );
+    command(s, record(s, id, { quantity: 1 }));
+    assert.match(render(), /data-state="danger"/);
+    assert.match(render(), /bg-danger\/10/);
+    assert.match(render(), /text-danger/);
+    assert.match(render(), /Exceeded limit/);
+    const task = getDashboard(s, date, date, now).tasks[0];
+    const taskHtml = renderToStaticMarkup(
+      createElement(TaskCard, {
+        task: { ...task, status: "done" },
+        timezone: "America/Toronto",
+        onOpen: () => {},
+        onComplete: () => {},
+        busy: false,
+      }),
+    );
+    assert.match(taskHtml, /bg-success\/10/);
+    assert.match(taskHtml, /Completed/);
+    assert.match(taskHtml, /Undo completion of/);
+    assert.doesNotMatch(
+      taskHtml,
+      /<button\b[^>]*>(?:(?!<\/button>)[\s\S])*<button\b/,
+    );
   } finally {
     s.sqlite.close();
   }

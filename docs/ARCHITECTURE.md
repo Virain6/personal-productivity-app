@@ -63,3 +63,11 @@ Home's existing `agenda(day)` renders task cards and small `CalendarHabit` cards
 All original workout limitations remain: only an explicit current-day completion advances, rest/missed days never do, and undo of an older advancement after another pointer change is rejected. Monthly indicators, advanced statistics and deployment are not implemented here. Physical iPhone verification remains a gate before claiming device readiness.
 
 Deployment preparation follows this phase, then Learning/Projects and Jobs/integrations. The long-term requirements remain in PROJECT_PLAN.md.
+
+## Sprint 4 — safe calendar quick actions
+
+`habit-quick.ts` defines shared pure quick-action decisions. The new `habitQuick` command loads the authoritative dated habit, checks versions, then delegates to existing `habitRecord` inside the same transaction and receipt handling. Home does not duplicate outcome, persistence or rotation rules. The response refreshes the existing shared queries. Pending controls are disabled; a synchronous gate and short cooldown suppress rapid clicks. A lost response retains the exact command for Retry save, preserving its receipt key. Review entry opens the existing correction dialog. Saved controls wait for authoritative refresh rather than claiming an optimistic final state.
+
+Optional `quickStep` lives in existing immutable configuration JSON, so old configurations need no migration and default to no step. Current step settings apply to historical records only when measurement type and unit match; otherwise the historical step is used. Arithmetic uses scaled integers and existing bounds. Unlogged is never implicitly zero; plus opens the total dialog until a starting value is recorded. Negative quantities expose explicit Log 0. Binary negative quick confirmation records no occurrence; undo clears that observation.
+
+Known current-day build workouts can record the displayed pending step and explicitly advance once. The control names advancement before saving. Rest, historical/ambiguous plans and protected older undo fall back to the existing dialog. Actual labels, manual plan moves and historical revisions retain their existing rules. Shared `CalendarStatus` and card classes give tasks and habits the same success treatment without mixing metrics.

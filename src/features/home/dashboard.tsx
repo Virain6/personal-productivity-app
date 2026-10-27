@@ -16,11 +16,12 @@ import { TaskTimer } from "@/features/timer/task-timer";
 import { SessionLog } from "@/features/timer/session-log";
 import { Dialog } from "@/components/ui/dialog";
 import { useTimer } from "@/features/timer/timer-provider";
-import { compareAgenda, completionLabel } from "@/lib/home";
+import { compareAgenda } from "@/lib/home";
 import { CalendarHabit } from "@/features/habits/calendar-habit";
 import { HabitLogDialog } from "@/features/habits/habit-log-dialog";
 import { useHabitCalendar } from "@/features/habits/use-habits";
 import type { HabitView } from "@/lib/habit-types";
+import { DailyProgress } from "./daily-progress";
 import { TaskCard } from "./task-card";
 import { addDays, weekStart, localDate, formatDuration } from "@/lib/dates";
 import { loadJson, sendCommand } from "@/lib/api";
@@ -36,6 +37,7 @@ function subscribeView(callback: () => void) {
   };
 }
 function viewSnapshot(): "day" | "week" {
+  if (!window.matchMedia("(min-width:768px)").matches) return "day";
   try {
     const saved = localStorage.getItem("planner.view.v1");
     if (saved === "day" || saved === "week") return saved;
@@ -142,9 +144,6 @@ export function Dashboard() {
   const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
   const today = data?.today ?? localDate();
   const selectedStats = data?.metrics.days.find((d) => d.date === date);
-  const percent = selectedStats?.required
-    ? Math.round((selectedStats.done / selectedStats.required) * 100)
-    : 0;
   function agenda(day: string) {
     const list =
       data?.tasks
@@ -169,8 +168,6 @@ export function Dashboard() {
           ))
         ) : !dayHabits.length && habitCalendar.data ? (
           <div className="rounded-lg border border-dashed border-border px-3 py-7 text-center text-xs leading-relaxed text-muted">
-            Room to breathe.
-            <br />
             No activities planned.
           </div>
         ) : null}
@@ -194,29 +191,9 @@ export function Dashboard() {
   }
   return (
     <>
-      <div className="mb-7 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="mb-1 text-xs uppercase tracking-[.16em] text-muted">
-            Make space for progress
-          </p>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Your week, at your pace.
-          </h1>
-          <p className="mt-2 text-sm text-muted">
-            A plan to guide you. Flexibility to make it yours.
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          onClick={() => setSelected(null)}
-          disabled={!data}
-        >
-          <Plus size={16} />
-          Add activity
-        </Button>
-      </div>
+      <h1 className="sr-only">Home calendar</h1>
       <section aria-label="Planner">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <Button
               variant="ghost"
@@ -239,10 +216,18 @@ export function Dashboard() {
             </h2>
             <Button onClick={() => setDate(today)}>Today</Button>
           </div>
+          <Button
+            variant="primary"
+            onClick={() => setSelected(null)}
+            disabled={!data}
+          >
+            <Plus size={16} />
+            Add activity
+          </Button>
           <div
             role="group"
             aria-label="Calendar view"
-            className="flex rounded-lg border border-border p-1"
+            className="hidden rounded-lg border border-border p-1 md:flex"
           >
             {(["day", "week"] as const).map((v) => (
               <button
@@ -256,11 +241,9 @@ export function Dashboard() {
             ))}
           </div>
         </div>
-        <div className="mb-4 flex items-center gap-2 text-xs text-muted">
+        <div className="mb-2 flex items-center gap-2 text-xs text-muted">
           <CalendarDays size={14} />
-          <span>
-            {data?.timezone ?? "America/Toronto"} · Suggested times are flexible
-          </span>
+          <span>{data?.timezone ?? "America/Toronto"}</span>
         </div>
         {habitCalendar.error && (
           <div role="alert" className="mb-3 text-sm text-danger">
@@ -312,9 +295,9 @@ export function Dashboard() {
                     <section
                       key={day}
                       aria-label={day}
-                      className={`min-w-0 rounded-xl p-1.5 ${day === today ? "bg-accent/5 ring-1 ring-accent/25" : ""}`}
+                      className={`min-w-0 rounded-lg p-1 ${day === today ? "bg-accent/5 ring-1 ring-accent/25" : ""}`}
                     >
-                      <div className="mb-4 flex items-center justify-between px-1">
+                      <div className="mb-1 flex items-center justify-between px-1">
                         <span className="text-[11px] uppercase tracking-wider text-muted">
                           {DateTime.fromISO(day).toFormat("ccc")}
                         </span>
@@ -324,33 +307,16 @@ export function Dashboard() {
                           {DateTime.fromISO(day).day}
                         </span>
                       </div>
-                      <p className="mb-2 text-[11px] text-muted">
-                        {completionLabel(
-                          data.metrics.days.find((d) => d.date === day)?.done ??
-                            0,
-                          data.metrics.days.find((d) => d.date === day)
-                            ?.required ?? 0,
-                        )}
-                      </p>
-                      <p className="mb-3 text-[11px] text-muted">
-                        {formatDuration(
-                          (data.metrics.days.find((d) => d.date === day)
-                            ?.plannedMinutes ?? 0) * 60000,
-                        )}{" "}
-                        planned ·{" "}
-                        {formatDuration(
-                          data.metrics.days.find((d) => d.date === day)
-                            ?.trackedMs ?? 0,
-                        )}{" "}
-                        recorded
-                      </p>
+                      <DailyProgress
+                        stats={data.metrics.days.find((d) => d.date === day)}
+                      />
                       {agenda(day)}
                     </section>
                   ))}
                 </div>
               </div>
               <div className={view === "week" ? "lg:hidden" : ""}>
-                <div className="mb-4 grid grid-cols-7 gap-1">
+                <div className="mb-2 grid grid-cols-7 gap-1">
                   {days.map((day) => (
                     <button
                       key={day}
@@ -359,7 +325,7 @@ export function Dashboard() {
                         "cccc, MMMM d",
                       )}
                       aria-pressed={day === date}
-                      className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-lg text-xs ${day === date ? "bg-accent/20 text-accent-hover" : "text-muted hover:bg-elevated"}`}
+                      className={`flex min-h-11 flex-col items-center justify-center gap-1 rounded-lg text-xs ${day === date ? "bg-accent/20 text-accent-hover" : "text-muted hover:bg-elevated"}`}
                     >
                       <span>{DateTime.fromISO(day).toFormat("ccc")}</span>
                       <span className="numeric">
@@ -368,29 +334,12 @@ export function Dashboard() {
                     </button>
                   ))}
                 </div>
-                <div className="mb-4 flex items-center justify-between">
+                <div className="mb-2 flex items-center justify-between">
                   <h3 className="font-medium">
                     {DateTime.fromISO(date).toFormat("cccc, MMMM d")}
                   </h3>
-                  <span className="text-xs text-muted">
-                    {completionLabel(
-                      selectedStats?.done ?? 0,
-                      selectedStats?.required ?? 0,
-                    )}
-                  </span>
                 </div>
-                <p className="mb-3 text-xs text-muted">
-                  {formatDuration((selectedStats?.plannedMinutes ?? 0) * 60000)}{" "}
-                  planned · {formatDuration(selectedStats?.trackedMs ?? 0)}{" "}
-                  recorded this day · {selectedStats?.skipped ?? 0} required
-                  skipped
-                </p>
-                <progress
-                  aria-label="Daily completion"
-                  value={percent}
-                  max={100}
-                  className="mb-5 h-1 w-full accent-accent"
-                />
+                <DailyProgress stats={selectedStats} />
                 <div
                   style={{ touchAction: "pan-y" }}
                   onTouchCancel={() => {
@@ -431,13 +380,13 @@ export function Dashboard() {
       {data && (
         <section
           aria-label="This week at a glance"
-          className="mt-8 border-t border-border pt-6"
+          className="mt-4 border-t border-border pt-3"
         >
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-medium">This week at a glance</h2>
-            <span className="text-xs text-muted">Saved activity only</span>
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-sm font-medium">Week summary</h2>
+            <span className="text-xs text-muted">Tasks only</span>
           </div>
-          <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
             {[
               {
                 label: "Completed",
@@ -466,18 +415,15 @@ export function Dashboard() {
                 icon: CalendarDays,
               },
             ].map((metric) => (
-              <div
-                key={metric.label}
-                className="rounded-xl border border-border bg-surface/50 p-4"
-              >
+              <div key={metric.label} className="min-w-0 p-2">
                 <div className="flex items-center gap-2 text-xs text-muted">
                   <metric.icon size={14} />
                   {metric.label}
                 </div>
-                <p className="numeric mt-3 text-xl font-medium">
+                <p className="numeric mt-1 text-base font-medium">
                   {metric.value}
                 </p>
-                <p className="mt-2 text-[11px] leading-relaxed text-muted">
+                <p className="mt-1 text-[11px] leading-snug text-muted">
                   {metric.detail}
                 </p>
               </div>
@@ -487,11 +433,6 @@ export function Dashboard() {
             <p className="mt-4 text-xs text-warning">
               Includes intentionally overlapping sessions. Recorded totals can
               exceed elapsed time.
-            </p>
-          )}
-          {data.metrics.trackedMs === 0 && (
-            <p className="mt-4 text-xs text-muted">
-              Your first recorded session will start your time history.
             </p>
           )}
         </section>

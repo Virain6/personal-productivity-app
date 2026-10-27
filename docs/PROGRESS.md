@@ -1,5 +1,30 @@
 # Progress
 
+Current phase: **Sprint 4 — Home UX refinement and quick actions complete.**
+Last verified: 2026-10-27. No commit, push or deployment performed.
+
+## Home UI follow-up — 2026-10-27
+
+Preserved all uncommitted Sprint 4 work. Added danger styling only for exceeded Avoid goals; explicit zero still uses success and absent records remain neutral. Mobile below 768px ignores saved desktop Week preference and hides the toggle; desktop controls and existing swipe handlers remain. Replaced daily required-count text with four partially fillable task progress pills and a thin recorded/planned time bar in both weekly columns and the day agenda. Uses existing server metrics, preserves actual totals above plan, caps visual fill at 100%, and shows empty progress for zero denominators. No persistence or business-rule changes.
+
+Verification: all 44 automated tests passed (updated rendered Avoid regression), lint, typecheck, production build, formatting and whitespace checks passed. An additional rendered-component check verified one-third partial segments, 50% time, time above plan capped at 100%, and zero-plan/zero-required handling without invalid numbers. Browser verified desktop toggle, mobile forced Day after saving Week, no mobile toggle or overflow, task completion updating 25% to 50%, and red Avoid occurrence. Screenshot inspected using synthetic data only. Physical-device swipe remains a manual check; handler unchanged. No commit or push. Next recommended task remains deployment preparation.
+
+## Sprint 4 work and evidence
+
+Started from clean commit `1ad7f84`, read the Sprint 4 request and project instructions, and verified the existing 38-test baseline. Preserved existing data/services and calendar behavior. Compacted the Home shell, toolbar, cards and task-only summary; removed motivational copy. Tasks and habits now share filled success checks, subtle teal borders/surfaces and readable muted text.
+
+Added separate quick controls for binary completion/undo, known current workout completion with visibly explicit rotation advancement, optional configurable quantity steps, and explicit zero for negative quantities. Card titles still open existing detail dialogs. Missing totals, historical/ambiguous/rest workouts and unsafe older undo use the detail flow. Quick steps update daily totals, not a separate increment ledger. No schema migration, dependency change or personal database write was needed.
+
+Verification: **44/44 automated tests passed**, including six new tests covering quick decisions, decimal arithmetic, existing missing/zero semantics, legacy/no-step fallback, historical unit changes, safe rotation, stale/double requests, lost-response retry and shared completion markup. Lint, typecheck, formatting check, production build and Git whitespace checks passed.
+
+Production browser preview used only synthetic `/private/tmp/planner-sprint4-preview.db` on port 3130. Desktop: binary complete/undo; known Push completion with actual label, next Pull and undo back to Push; explicit zero success, increment to exceeded and decrement back; Water double-click increments exactly once (1000 to 1250), refresh persistence and decrement; title opens independent details; unlogged historical plus opens a blank total dialog. Mobile 375px: automatic day layout, quantity action, task completion updating daily summary, next/previous day and disabled future logging. Content width matched viewport client width (360px with scrollbar). Desktop/mobile screenshots inspected. Existing scheduling, timers, manual time and summary regression tests passed; not every pre-existing workflow was repeated in the browser this sprint.
+
+Remaining: physical iPhone Safari swipe, keyboard, lock/reconnect, VoiceOver and two-device checks. No offline queue. Ambiguous quick actions intentionally open details; older rotation undo restrictions remain. Narrow desktop week columns wrap long titles; day view and sidebar collapse remain available. Network-loss retry was verified through an automated transport test, not browser network simulation.
+
+**Ready for deployment preparation**, not deployed: next establish home-server OS/CPU/storage and private access, prepare Docker and persistent storage, verify backup/restore and real-device use. Monthly statistics and other modules remain future work.
+
+## Historical Phase 3 record
+
 Current phase: **Phase 3 — goal directions and in-calendar habit logging complete.**
 Last verified: 2026-10-27. No commit or push performed.
 

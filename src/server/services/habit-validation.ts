@@ -19,6 +19,10 @@ export const habitConfig = z
     direction: z.enum(["build", "limit", "avoid"]).optional(),
     goal: z.enum(["awareness", "atLeast", "atMost"]),
     target: quantity.nullable(),
+    quickStep: quantity
+      .refine((n) => n > 0, "Quick step must be positive.")
+      .nullable()
+      .optional(),
     schedule: z.enum(["daily", "weekdays", "weekly"]),
     weekdays: z.array(z.number().int().min(1).max(7)).max(7),
     timesPerWeek: z.number().int().min(1).max(7),
@@ -72,6 +76,14 @@ export const habitConfig = z
   });
 const base = { id: z.string().uuid(), version: z.number().int().positive() };
 export const habitCommand = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("habitQuick"),
+    ...base,
+    date,
+    revisionId: z.string().uuid(),
+    entryVersion: z.number().int().min(0),
+    mode: z.enum(["toggle", "zero", "increment", "decrement"]),
+  }),
   z.object({ action: z.literal("habitCreate"), config: habitConfig }),
   z.object({ action: z.literal("habitEdit"), ...base, config: habitConfig }),
   z.object({

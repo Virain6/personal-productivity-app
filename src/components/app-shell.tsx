@@ -83,7 +83,7 @@ export function AppShell({ children }: Readonly<{ children: ReactNode }>) {
         </div>
       </aside>
       <div className="min-w-0 flex-1">
-        <header className="flex h-14 items-center justify-between border-b border-border px-5 text-xs text-muted md:px-8">
+        <header className="flex h-11 items-center justify-between border-b border-border px-5 text-xs text-muted md:px-8">
           <span className="flex items-center gap-2">
             <Moon size={16} className="text-accent-hover md:hidden" />
             Personal workspace <span className="mx-2 text-border">/</span>
@@ -91,12 +91,11 @@ export function AppShell({ children }: Readonly<{ children: ReactNode }>) {
               {links.find((l) => l.href === pathname)?.label ?? "Planner"}
             </span>
           </span>
-          <span className="hidden sm:block">One day at a time.</span>
         </header>
         <main
           id="main-content"
           tabIndex={-1}
-          className="mx-auto max-w-[1600px] px-4 pb-64 pt-7 md:px-7 md:pb-40 lg:px-9"
+          className={`mx-auto max-w-[1600px] px-4 pb-52 md:pb-32 ${pathname === "/" ? "pt-3 md:px-4" : "pt-6 md:px-7 lg:px-9"}`}
         >
           {children}
         </main>

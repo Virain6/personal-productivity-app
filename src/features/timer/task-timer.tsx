@@ -7,7 +7,7 @@ export function TaskTimer({ task }: { task: Task }) {
   const active = timer.running?.taskId === task.id;
   return (
     <button
-      className={`flex size-11 items-center justify-center rounded-lg hover:bg-elevated disabled:opacity-40 ${active ? "text-success" : "text-accent-hover"}`}
+      className={`flex size-11 shrink-0 items-center justify-center rounded-lg hover:bg-elevated disabled:opacity-40 ${active ? "text-success" : "text-accent-hover"}`}
       disabled={
         timer.busy || task.status === "done" || task.status === "skipped"
       }

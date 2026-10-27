@@ -8,6 +8,7 @@ export type HabitConfig = {
   direction?: HabitDirection;
   goal: "awareness" | "atLeast" | "atMost";
   target: number | null;
+  quickStep?: number | null;
   schedule: "daily" | "weekdays" | "weekly";
   weekdays: number[];
   timesPerWeek: number;
@@ -33,6 +34,7 @@ export type HabitView = {
   archived: boolean;
   createdDate: string;
   config: HabitConfig;
+  currentRevisionId: string;
   dateConfig: HabitConfig | null;
   revisionId: string | null;
   nextIndex: number;

@@ -1,6 +1,6 @@
 # Development tasks
 
-Current phase: **Phase 3 goal directions and in-calendar habit logging complete; ready for deployment preparation.**
+Current phase: **Sprint 4 Home refinement and safe quick actions complete; ready for deployment preparation.**
 
 ## Active priority order
 
@@ -11,6 +11,25 @@ Current phase: **Phase 3 goal directions and in-calendar habit logging complete;
 5. Job Application Tracker and integrations.
 
 This order supersedes the original milestone ordering and release gate, not the long-term requirements. Milestone IDs below remain stable references. The daily-use MVP gate is Home + Habits + deployment; Learning/Projects no longer block deployment. Home calendar logging and the separate Habits management/history page are functional. Monthly statistics remain future work.
+
+## Home UI follow-up — completed 2026-10-27
+
+- [x] Avoid occurrences use subtle danger red; explicit zero stays success and unlogged stays neutral.
+- [x] Mobile below 768px always uses Day view with no toggle, preserving desktop preferences and swipe handling.
+- [x] Shared daily progress: four proportional task segments and recorded/planned time bar capped at 100%.
+- [x] Verify 44 tests, lint, typecheck, build, formatting, progress boundary checks and responsive browser behavior.
+
+## Sprint 4 — Home refinement and quick actions
+
+- [x] Compact Home header, navigation, cards and summary; remove motivational filler.
+- [x] Shared task/habit success check, teal surface and border; neutral missing/rest states.
+- [x] Separate title/detail controls from binary complete/undo and safe workout complete/advance.
+- [x] Optional configurable quantity steps, explicit Log 0, integer arithmetic and historical-unit safety.
+- [x] Preserve existing dialogs for corrections and ambiguous workouts/starting totals.
+- [x] Pending/error/retry feedback, rapid-click guard, version checks and idempotent receipts.
+- [x] 44 tests plus lint, typecheck, formatting, production build and desktop/mobile browser verification.
+- [x] Update architecture, design and progress documentation.
+- [ ] Physical iPhone swipe/keyboard/VoiceOver and two-device checks during deployment preparation.
 
 ## Phase 3 — goal directions and Home calendar integration
 

@@ -1,3 +1,4 @@
+import { quickHabitRecord } from "../../lib/habit-quick";
 import { and, eq, desc, lte, gte } from "drizzle-orm";
 import { DateTime } from "luxon";
 import type { Store } from "../db/connection";
@@ -47,8 +48,24 @@ export function mutateHabit(
   c: HabitCommand,
   now: number,
   timezone: string,
-) {
+): string {
   const today = localDate(now, timezone);
+  if (c.action === "habitQuick") {
+    requireHabit(s, c.id, c.version);
+    const view = getHabits(s, c.date, now).habits.find((h) => h.id === c.id)!;
+    const values = quickHabitRecord(view, c.date, today, c.mode);
+    if (!values)
+      throw new DomainError(
+        "Open habit details to review this entry before saving.",
+        409,
+      );
+    return mutateHabit(
+      s,
+      { ...c, ...values, action: "habitRecord" },
+      now,
+      timezone,
+    );
+  }
   if (c.action === "habitCreate") {
     const id = crypto.randomUUID();
     s.db
@@ -255,7 +272,8 @@ export function getHabits(
       .from(habits)
       .all()
       .map((h) => {
-        const config = current(s, h.id).config;
+        const latest = current(s, h.id);
+        const config = latest.config;
         const record =
           records.find((r) => r.habitId === h.id && r.date === date) ?? null;
         const rev = record
@@ -294,6 +312,7 @@ export function getHabits(
         return {
           ...h,
           config,
+          currentRevisionId: latest.id,
           dateConfig: cfg ?? null,
           revisionId: rev?.id ?? null,
           record,

@@ -55,6 +55,10 @@ export function HabitEditor({
           : f.get("target") !== null && f.get("target") !== ""
             ? Number(f.get("target"))
             : null,
+      quickStep:
+        kind === "quantity" && f.get("quickStep") !== ""
+          ? Number(f.get("quickStep"))
+          : null,
       schedule,
       weekdays: f.getAll("weekday").map(Number),
       timesPerWeek: Number(f.get("times") ?? 3),
@@ -164,6 +168,23 @@ export function HabitEditor({
               </span>
             </label>
           )
+        )}
+        {kind === "quantity" && (
+          <label>
+            Quick step · optional
+            <input
+              name="quickStep"
+              type="number"
+              min="0.001"
+              max="1000000000"
+              step="0.001"
+              defaultValue={c.quickStep ?? ""}
+            />
+            <span className="text-xs text-muted">
+              Amount added or removed by Home’s +/− controls, in this habit’s
+              unit. Blank uses numeric entry.
+            </span>
+          </label>
         )}
         <label>
           Schedule
