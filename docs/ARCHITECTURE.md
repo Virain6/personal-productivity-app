@@ -18,7 +18,7 @@ Host and Origin checks protect browser writes; local defaults allow loopback onl
 
 ## Deployment and later work
 
-One Docker container will serve frontend and backend on the home server. SQLite will use a persistent local volume. Tailscale/private HTTPS, owner access restrictions, consistent scheduled backups and a restore rehearsal are required before deployment. No deployment exists yet.
+Docker/Compose configuration now prepares one standalone Next.js container for frontend and backend. SQLite and backups use persistent host bind directories. Tailscale/private HTTPS, owner access restrictions, a backup schedule and target container/restore rehearsal still require deployment acceptance. No server deployment exists yet.
 
 Roadmaps, milestones, projects/goals, jobs/import, advanced analytics and Apple Calendar are future modules. Habits and simple workout rotation are implemented below. Import will use validation preview and explicit commit. Calendar starts with ICS export; private subscriptions may not be reachable by Apple infrastructure and refresh asynchronously. Two-way sync is not promised.
 
@@ -71,3 +71,11 @@ Deployment preparation follows this phase, then Learning/Projects and Jobs/integ
 Optional `quickStep` lives in existing immutable configuration JSON, so old configurations need no migration and default to no step. Current step settings apply to historical records only when measurement type and unit match; otherwise the historical step is used. Arithmetic uses scaled integers and existing bounds. Unlogged is never implicitly zero; plus opens the total dialog until a starting value is recorded. Negative quantities expose explicit Log 0. Binary negative quick confirmation records no occurrence; undo clears that observation.
 
 Known current-day build workouts can record the displayed pending step and explicitly advance once. The control names advancement before saving. Rest, historical/ambiguous plans and protected older undo fall back to the existing dialog. Actual labels, manual plan moves and historical revisions retain their existing rules. Shared `CalendarStatus` and card classes give tasks and habits the same success treatment without mixing metrics.
+
+## Sprint 5 — operational boundary
+
+Docker uses supported Node 22 Debian slim and npm ci, checks the Linux native SQLite binding during build, and ships standalone output/static/public assets plus migration tools and SQL. Non-root UID/GID 10001 owns runtime storage; Compose publishes only 127.0.0.1:3100, drops capabilities and bounds logs. One replica, local-disk SQLite WAL, restart unless stopped. No additional service or schema changes.
+
+The startup tool reads the migration journal and backs up an existing database before pending migrations, failing startup if verification or backup fails. Fresh databases migrate without seeds; no-op restarts create no extra backups. The existing application retains idempotent default initialization on first API use. Use the deployment tool for production migrations, not the development-only db:migrate script. Stop the app for upgrades. Backup uses SQLite's online API, records checksum/time/migration metadata, and verifies integrity/FKs. Restore validates checksum and DB before atomically publishing to a new empty destination; it cannot overwrite active data. Health opens an existing DB read-only and returns minimal 200/503 without seeding.
+
+PWA uses a root-scoped standalone manifest and PNG/Apple icons with Midnight Focus metadata. No service worker or offline mutation queue. Tailnet policy is the authentication boundary; HTTP origin guards do not authenticate users. Tailscale Serve owns private TLS on a reviewed dedicated listener; no Funnel/public binding or Tailscale SSH configuration. DEPLOYMENT.md records operational commands and unverified target checks.

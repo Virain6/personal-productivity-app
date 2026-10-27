@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 import { TimerProvider } from "@/features/timer/timer-provider";
@@ -6,7 +6,17 @@ import { AppShell } from "@/components/app-shell";
 
 export const metadata: Metadata = {
   title: "Planner",
+  applicationName: "Planner",
+  appleWebApp: { capable: true, title: "Planner", statusBarStyle: "default" },
+  icons: { apple: "/icons/apple-touch-icon.png" },
   description: "A personal space for learning, projects, and everyday habits.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#101114",
 };
 
 export default function RootLayout({

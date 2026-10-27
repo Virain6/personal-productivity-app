@@ -1,0 +1,34 @@
+name: planner
+services:
+  planner:
+    image: planner:${PLANNER_IMAGE_TAG:-local}
+    build:
+      context: .
+    init: true
+    restart: unless-stopped
+    user: "10001:10001"
+    ports:
+      - "127.0.0.1:${PLANNER_PORT:-3100}:3000"
+    environment:
+      DATABASE_PATH: /app/data/planner.db
+      BACKUP_DIRECTORY: /app/backups
+      APP_ORIGIN: ${APP_ORIGIN:?Set the exact private HTTPS origin in .env}
+      TZ: America/Toronto
+    volumes:
+      - type: bind
+        source: ${PLANNER_DATA_DIR:-./data}
+        target: /app/data
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${PLANNER_BACKUP_DIR:-./backups}
+        target: /app/backups
+        bind:
+          create_host_path: false
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

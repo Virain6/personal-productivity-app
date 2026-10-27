@@ -1,7 +1,19 @@
 # Progress
 
-Current phase: **Sprint 4 — Home UX refinement and quick actions complete.**
+Current phase: **Sprint 5 — deployment preparation complete, pending operational acceptance.**
 Last verified: 2026-10-27. No commit, push or deployment performed.
+
+## Sprint 5 — recovery and completed preparation
+
+Before interruption: created Dockerfile, Compose, .dockerignore, standalone output, health endpoint, PWA manifest/icons/metadata, initial migration/backup/restore tool, deployment guide and two operational tests (46 total). Tests/build checks passed after correcting the tool to ESM. The standalone smoke test stopped on an outdated metadata assertion: installed Next emits `mobile-web-app-capable`, not the older Apple-prefixed name. Subsequent verification was blocked by exhausted approval-review credits, not a code rejection. Tracking docs were still at Sprint 4.
+
+After resuming: re-read instructions and reviewed all changes; preserved the user's separate uncommitted Home toolbar edit. Added automatic verified backup before pending migrations, fail-closed behavior on backup failure, explicit backup verification, checksum checks before restore and atomic exclusive publication into a new destination. Added a third operational test. Updated environment example, build exclusions and guide with the supplied x86_64/Docker 29.2.1/Compose 5.1.0/RAM details and missing-Tailscale installation steps, without enabling Tailscale SSH or changing any actual server.
+
+Final verification: **47/47 tests passed**, lint, typecheck, formatting, production build, Compose config validation and whitespace checks passed. Tests cover live WAL backup, migration reruns/no seeds, restore preservation and overwrite rejection, corrupt/checksum failures, backup failure blocking migrations, and missing DB health without accidental creation. Standalone artifact staged outside the repository with synthetic DB: entrypoint migration succeeded; HTTP health, manifest, all PNG assets, emitted standalone/Apple/viewport metadata, database API and foreign-origin rejection passed. Icon inspected visually. No application data or schema changes; no package/lockfile changes.
+
+Docker CLI/Compose are installed locally, but daemon connection fails. **Linux image build/start, non-root bind permissions, container restart/recreation persistence and image filesystem inspection were not run.** Static build-context/Git checks found no tracked runtime DB/backups or production environment files; this is not a container-image audit. Actual Ubuntu, Tailscale, HTTPS, access denial and Mac/iPhone PWA installation were not tested. No server connection, commit, push or deployment occurred. No backup schedule/retention deletion was installed.
+
+Next: review configuration, commit/push when ready, verify exact Ubuntu release and free local disk, then follow DEPLOYMENT.md. Supplied server resources are user-reported, not independently measured. Review owner-only tailnet policy before real data; APP_ORIGIN is not authentication. Perform target image build, restore/recreation and two-device acceptance checks. Keep existing services untouched. Node 22 remains supported through April 2027; schedule a tested upgrade before EOL.
 
 ## Home UI follow-up — 2026-10-27
 

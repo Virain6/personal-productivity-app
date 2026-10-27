@@ -1,6 +1,6 @@
 # Development tasks
 
-Current phase: **Sprint 4 Home refinement and safe quick actions complete; ready for deployment preparation.**
+Current phase: **Sprint 5 deployment preparation complete; container/server/device acceptance checks remain.**
 
 ## Active priority order
 
@@ -11,6 +11,20 @@ Current phase: **Sprint 4 Home refinement and safe quick actions complete; ready
 5. Job Application Tracker and integrations.
 
 This order supersedes the original milestone ordering and release gate, not the long-term requirements. Milestone IDs below remain stable references. The daily-use MVP gate is Home + Habits + deployment; Learning/Projects no longer block deployment. Home calendar logging and the separate Habits management/history page are functional. Monthly statistics remain future work.
+
+## Sprint 5 — deployment preparation
+
+- [x] Preserve existing Home edit; inspect Docker, database, metadata and project docs.
+- [x] Multi-stage standalone Dockerfile, non-root UID 10001, loopback Compose binding and persistent data/backup mounts.
+- [x] Startup migrations with verified backup before pending changes; read-only health endpoint.
+- [x] SQLite-safe backup, checksum/integrity verification and restore to new destinations only.
+- [x] PWA manifest, 192/512 icons, Apple icon and viewport metadata; no offline writes.
+- [x] Server-specific deployment, Tailscale installation/access, update, backup/restore and rollback guide.
+- [x] 47 tests, lint, typecheck, formatting, production build, Compose validation and isolated standalone HTTP smoke test.
+- [ ] Docker image build/start/recreation persistence — local daemon unavailable.
+- [ ] Confirm Ubuntu version and free local disk, install Tailscale, review owner access policy and actual HTTPS URL.
+- [ ] Authorized server deployment, restore rehearsal, denied-access test and Mac/iPhone installation.
+- [ ] Install backup schedule/off-host copies after deployment review; no scheduler changed here.
 
 ## Home UI follow-up — completed 2026-10-27
 
@@ -162,7 +176,7 @@ Acceptance: History remains stable; entries aggregate correctly; Home displays d
 Dependency: Verified Home and Habits; server details/access decisions required (new priority 3).
 
 - [ ] Confirm server OS/CPU, storage and owner-only access model.
-- [ ] Create Docker/Compose with persistent local storage and startup migrations.
+- [x] Prepare Docker/Compose with persistent local storage and startup migrations (container execution still pending).
 - [ ] Configure private HTTPS/Tailscale and verify unauthorized access denied.
 - [ ] Implement consistent backup schedule/retention and perform restore rehearsal.
 - [ ] Smoke-test phone/laptop and container replacement; use for seven days and fix friction.

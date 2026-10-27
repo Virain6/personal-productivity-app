@@ -216,29 +216,30 @@ export function Dashboard() {
             </h2>
             <Button onClick={() => setDate(today)}>Today</Button>
           </div>
-          <Button
-            variant="primary"
-            onClick={() => setSelected(null)}
-            disabled={!data}
-          >
-            <Plus size={16} />
-            Add activity
-          </Button>
-          <div
-            role="group"
-            aria-label="Calendar view"
-            className="hidden rounded-lg border border-border p-1 md:flex"
-          >
-            {(["day", "week"] as const).map((v) => (
-              <button
-                key={v}
-                aria-pressed={view === v}
-                onClick={() => changeView(v)}
-                className={`min-h-11 rounded-md px-4 text-xs capitalize ${view === v ? "bg-elevated text-foreground" : "text-muted"}`}
-              >
-                {v}
-              </button>
-            ))}
+          <div className="flex gap-3">
+            <div
+              role="group"
+              aria-label="Calendar view"
+              className="hidden rounded-lg border border-border p-1 md:flex"
+            >
+              {(["day", "week"] as const).map((v) => (
+                <button
+                  key={v}
+                  aria-pressed={view === v}
+                  onClick={() => changeView(v)}
+                  className={`min-h-11 rounded-md px-4 text-xs capitalize ${view === v ? "bg-elevated text-foreground" : "text-muted"}`}
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
+            <Button
+              variant="primary"
+              onClick={() => setSelected(null)}
+              disabled={!data}
+            >
+              <Plus size={32} strokeWidth={3} />
+            </Button>
           </div>
         </div>
         <div className="mb-2 flex items-center gap-2 text-xs text-muted">

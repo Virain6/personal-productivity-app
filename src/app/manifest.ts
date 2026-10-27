@@ -1,0 +1,33 @@
+import type { MetadataRoute } from "next";
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    id: "/",
+    name: "Planner",
+    short_name: "Planner",
+    start_url: "/",
+    scope: "/",
+    display: "standalone",
+    background_color: "#101114",
+    theme_color: "#101114",
+    icons: [
+      {
+        src: "/icons/planner-192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/planner-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/planner-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
+      },
+    ],
+  };
+}
