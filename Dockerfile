@@ -5,6 +5,12 @@ FROM ${NODE_IMAGE} AS build
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY package.json package-lock.json ./
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        python3 \
+        make \
+        g++ \
+    && rm -rf /var/lib/apt/lists/*
 RUN npm ci
 RUN node -e "const D=require('better-sqlite3'); const db=new D(':memory:'); db.prepare('SELECT 1').get(); db.close()"
 COPY . .
