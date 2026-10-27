@@ -38,6 +38,7 @@ export type Session = {
   startedAt: number;
   endedAt: number | null;
   source: "timer" | "manual";
+  overlapConfirmed: boolean;
   summary: string;
 };
 export type HomeData = {
@@ -49,10 +50,20 @@ export type HomeData = {
   timezone: string;
   metrics: {
     completed: number;
+    skipped: number;
+    optionalCompleted: number;
+    overlapConfirmed: boolean;
     required: number;
     requiredDone: number;
     plannedMinutes: number;
     trackedMs: number;
-    days: { date: string; trackedMs: number; done: number; required: number }[];
+    days: {
+      date: string;
+      trackedMs: number;
+      plannedMinutes: number;
+      skipped: number;
+      done: number;
+      required: number;
+    }[];
   };
 };

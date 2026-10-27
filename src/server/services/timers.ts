@@ -1,4 +1,4 @@
-import { eq, and, isNull, gt, lt, or } from "drizzle-orm";
+import { eq, and, isNull, gt, lt, or, ne } from "drizzle-orm";
 import type { Store } from "../db/connection";
 import { sessions, tasks } from "../db/schema";
 import { requireTask, setStatus } from "./tasks";
@@ -68,25 +68,7 @@ export function manualLog(
   now: number,
 ) {
   requireTask(store, id);
-  if (endedAt <= startedAt || endedAt > now || startedAt < 0)
-    throw new DomainError("Enter a positive interval ending in the past.");
-  if (endedAt - startedAt > 7 * 86400000)
-    throw new DomainError("A manual session must be shorter than seven days.");
-  const overlap = store.db
-    .select()
-    .from(sessions)
-    .where(
-      and(
-        lt(sessions.startedAt, endedAt),
-        or(isNull(sessions.endedAt), gt(sessions.endedAt, startedAt)),
-      ),
-    )
-    .get();
-  if (overlap && !overlapConfirmed)
-    throw new DomainError(
-      "This overlaps recorded or running time. Review the interval and explicitly allow the overlap if intentional.",
-      409,
-    );
+  validateInterval(store, startedAt, endedAt, overlapConfirmed, now);
   const sessionId = crypto.randomUUID();
   store.db
     .insert(sessions)
@@ -101,4 +83,91 @@ export function manualLog(
     })
     .run();
   return sessionId;
+}
+function validateInterval(
+  store: Store,
+  startedAt: number,
+  endedAt: number,
+  overlapConfirmed: boolean,
+  now: number,
+  excludeId?: string,
+) {
+  if (endedAt <= startedAt || endedAt > now || startedAt < 0)
+    throw new DomainError("Enter a positive interval ending in the past.");
+  if (endedAt - startedAt > 7 * 86400000)
+    throw new DomainError("A manual session must be shorter than seven days.");
+  const overlap = store.db
+    .select()
+    .from(sessions)
+    .where(
+      and(
+        excludeId ? ne(sessions.id, excludeId) : undefined,
+        lt(sessions.startedAt, endedAt),
+        or(isNull(sessions.endedAt), gt(sessions.endedAt, startedAt)),
+      ),
+    )
+    .get();
+  if (overlap && !overlapConfirmed)
+    throw new DomainError(
+      "This overlaps recorded or running time. Review the interval and explicitly allow the overlap if intentional.",
+      409,
+    );
+}
+export function switchTimer(
+  store: Store,
+  expectedSessionId: string,
+  nextTaskId: string,
+  now: number,
+) {
+  const running = store.db
+    .select()
+    .from(sessions)
+    .where(isNull(sessions.endedAt))
+    .get();
+  if (!running || running.id !== expectedSessionId)
+    throw new DomainError(
+      "The active timer changed. Review it before switching.",
+      409,
+    );
+  if (running.taskId === nextTaskId)
+    throw new DomainError("This activity is already running.", 409);
+  stopTimer(store, running.id, running.summary, now);
+  return startTimer(store, nextTaskId, Math.max(now, running.startedAt + 1));
+}
+export function correctSession(
+  store: Store,
+  id: string,
+  expected: {
+    startedAt: number;
+    endedAt: number;
+    summary: string;
+    overlapConfirmed: boolean;
+  },
+  startedAt: number,
+  endedAt: number,
+  summary: string,
+  overlapConfirmed: boolean,
+  now: number,
+) {
+  const old = store.db.select().from(sessions).where(eq(sessions.id, id)).get();
+  if (!old) throw new DomainError("Session not found.", 404);
+  if (old.endedAt === null)
+    throw new DomainError("Pause the timer before correcting its time.", 409);
+  if (
+    old.startedAt !== expected.startedAt ||
+    old.endedAt !== expected.endedAt ||
+    old.summary !== expected.summary ||
+    old.overlapConfirmed !== expected.overlapConfirmed
+  )
+    throw new DomainError(
+      "This session changed. Cancel and reopen the correction to review the latest values.",
+      409,
+    );
+  validateInterval(store, startedAt, endedAt, overlapConfirmed, now, id);
+  store.db
+    .update(sessions)
+    .set({ startedAt, endedAt, summary, overlapConfirmed })
+    .where(eq(sessions.id, id))
+    .run();
+  return id;
 }

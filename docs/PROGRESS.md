@@ -1,36 +1,115 @@
 # Progress
 
-Last updated: 2026-10-26. **Sprint 1 A–F implemented and verified within the limits below.** The full product plan remains in progress.
+Current phase: **Phase 3 — goal directions and in-calendar habit logging complete.**
+Last verified: 2026-10-27. No commit or push performed.
 
-## Resume audit
+## Recovery and completed work
 
-Reviewed Git status, existing modified/untracked files, AGENTS.md, PROJECT_PLAN.md, TASKS.md, PROGRESS.md and the original Sprint 1 request. A–D were already implemented; E needed final timer verification and F needed browser checks/documentation. Preserved working code and continued those steps. The repository still contains uncommitted/untracked implementation files; nothing was committed or pushed.
+Read the resume attachment, AGENTS, plan, design/tasks/progress/architecture/decisions; inspected Git status, recent history, schema/migrations and actual code. Prior uncommitted Home and Habits work is preserved. Documentation was still at Phase 2.
+
+Before interruption: goal directions, safe legacy defaults, zero/missing semantics, shared outcome/weekly observation helpers, and a separate Home Habits section were implemented. All 36 tests and lint/typecheck/format/build passed. Browser checks had exercised goals and shared Home logging, but final mobile checks and docs were unfinished.
+
+After resuming: retained goal logic and replaced that separate section according to the clarified request. Added bounded date-range calendar reads; compact teal habit cards inside the existing weekly/daily agendas; date-specific binary, quantity and workout dialogs; versioned save-and-close; retained errors/drafts; explicit unsaved discard; future read-only states; recorded archived history and explicit workout date placement. Study tasks, timers and task metrics remain separate. Updated PROJECT_PLAN.md without removing long-term features.
+
+## Verification evidence
+
+- **38/38 tests pass**. The 36-test baseline passed before resume. Added calendar projection tests for weekdays, no task copies/empty records, pre-creation/future dates, schedule edits, historical names/records, archives/corrections, invalid ranges and workout rescheduling without rotation advancement.
+- Existing tests cover build/limit/avoid across all measurement types, zero versus absent, inclusive limits, legacy JSON unchanged, historical corrections, daily/weekly counts, timezone/week/DST boundaries, persistence/retries/stale writes, Home metrics isolation and all scheduling/timer/manual-log regressions.
+- Lint, typecheck, formatting, production build and git diff whitespace check passed. Earlier draft fixture and punctuation failures were fixed before the 36-test checkpoint; no outstanding failures.
+- Final production preview: port 3129 with synthetic `/private/tmp/planner-phase3-preview.db`; no personal database writes or schema changes. Goal directions are compatible through read-time defaults, not a destructive data migration.
+- Browser: weekly habit placement; historical quantity correction October 26 from zero to one updates only that date; October 27 starts unlogged and explicit zero saves Within limit; binary completion saves; avoid confirmation saves; workout actual Cardio with explicit advance, then neutral rest/undo; older rotation undo rejected while keeping edits. Unsaved-close/Keep editing/Discard verified. Future controls disabled. Day/week navigation and refresh persistence checked.
+- Mobile 375px: single-day agenda and date-specific popup, no horizontal overflow (360px content/client width with scrollbar); readable scrollable dialog. Viewport restored. Desktop screenshot inspected. Browser warning/error log empty.
+- Home browser regression: complete/undo study task; start timer, reload, and pause via global controls. Scheduling/reschedule/skip/manual-time and summary regressions passed automated tests; those workflows were not all re-entered manually this turn.
+
+## Limits and next task
+
+Physical iPhone Safari swipe/keyboard/lock/reconnect, VoiceOver and two physical devices still need manual verification. The swipe handlers are unchanged; date buttons were browser-verified. No offline write queue. Dialogs retain stale drafts and reject conflicts; close/reopen to load fresh values after reviewing the error.
+
+Flexible weekly habits appear on any day labeled flexible, not on invented fixed weekdays. Recorded voluntary/archived dates remain visible as history. Workout future labels show the current pending step; they do not predict rotation movement. Older rotation undo restrictions and three-decimal daily totals remain. No monthly calendar statistics, advanced analytics, Apple integration, other modules or deployment were started.
+
+**Ready for deployment preparation**, not deployment-ready: next confirm server OS/CPU/storage and private access model, prepare Docker/persistent storage, and verify backup/restore plus real-device access. Optional monthly habit statistics can follow daily use. Do not automatically commit, push or deploy.
+
+## Historical Phase 2 record
+
+Current phase: **Phase 2 — Habits Foundation complete; ready for scoped Home integration.**
+Last verified: 2026-10-26. No commit or push performed.
+
+## Recovery checkpoint
+
+Read the resume attachment and reviewed AGENTS.md, PROJECT_PLAN.md, design/tasks/progress/architecture/decisions, Git status and the uncommitted implementation. Preserved all earlier Home work. The working tree still contains the earlier Home changes as well as this phase; do not overwrite or discard them.
+
+Before the Habits interruption, schema/services/commands, migration, responsive management/history UI and eight Habits tests were implemented. The migration had already been applied after a backup, 27 total tests and build checks passed, and browser interactions covered all three habit types, archive/restore and mobile layout. Documentation still described Habits as future work.
+
+After resume, added two focused tests for past-day correction following unit changes and safe rejection of older rotation undo; inspected remaining paths; refined long-label wrapping and compact desktop columns; verified Home in the final production build; and updated tracking, decisions, architecture and README.
 
 ## Implemented
 
-- Midnight Focus charcoal/violet theme, local Geist/Lucide, accessible dialogs/buttons, collapsible desktop sidebar and mobile bottom navigation. Future modules are labelled placeholders.
-- SQLite/Drizzle migrations, exact weekly routines, bounded idempotent occurrence generation, optional Sunday, and independent task/completion/session records.
-- Day/week Home, persisted occurrence creation/edit/move/skip/reopen/completion/undo, flexible suggested times and fixed one-off events.
-- One persistent timer, pause/resume/finish, optional completion, session summaries, manual entries and explicit overlap handling. Transactions, unique indexes, optimistic versions and mutation receipts protect concurrent/retried operations.
-- Daily completion percentage/time and weekly saved-data summaries. No fabricated metrics or standalone notes feature.
-- Resume fixes: actual Host/Origin validation handles Next localhost normalization; uncertain write retries retain their original key; manual submission reads its current form date and accepts minute timestamps with zero seconds. Updated README, environment example, architecture, decisions and trackers.
+- Binary completion/undo/correction; quantities with configurable units and optional minimum/maximum targets or awareness only; workout actual type independent of planned type.
+- Create/edit/archive/restore, daily/selected-weekday/flexible weekly schedules, date navigation and weekly history. Quantity Save replaces the daily total, with zero distinct from not logged.
+- One unique, versioned record per habit/local date. Settings revisions preserve original historical names/types/units/targets/schedules. Archived records remain readable/correctable.
+- Simple workout rotation: explicit advancement after completion, no movement on missed/rest days, manual next-step/date selection, safe latest-advance undo, retained planned and actual labels.
+- Loading/empty/error states, server validation, request retry receipts, stale-write conflicts and 15-second/focus/reconnect refresh. Midnight Focus components and responsive layout reused.
+
+## Database and preservation
+
+Added `habits`, `habit_revisions` and `habit_records` in `0002_curvy_warlock.sql`; no existing table was rebuilt or reset. Backup: `backups/before-habits-20261026T191311Z.db`, created with SQLite backup API and checked successfully. After migration, all rows in the six existing application tables matched their pre-migration values; integrity was `ok` and foreign-key checks returned zero violations.
 
 ## Verification
 
-- `npm test`: 14/14 pass. Covers fresh/rerun migrations and seeds, persistence/reconnect, complete/undo history, schedule/move preservation, validation, DST/midnight allocation, optional exclusion, timer pause/resume/retry/restart, atomic completion, manual overlap/future rejection, two competing processes and origin guards.
-- `npm run lint`, `npm run typecheck`, `npm run build`: pass.
-- Formatting applied and final format check recorded at completion.
-- `npm audit --omit=dev`: zero vulnerabilities. Full dependency audit previously reported four moderate development-tool advisories through drizzle-kit/esbuild; do not blindly downgrade tooling to an incompatible release. ESLint 9 remains the intentional compatible pin described in DECISIONS.md.
-- Production browser preview used a separate synthetic database at `/private/tmp/planner-sprint1-browser-20261026.db`, not the personal database. Verified the weekly schedule, complete/refresh/undo, running timer recovery after reload, pause/resume, finish without completion, saved summaries, and manual 25-minute entry retained after refresh and reflected in totals. Final browser error/warning query was empty.
-- At 375px: day layout, next-day control and More navigation work; document width equals viewport width, with no horizontal overflow. Desktop week layout inspected. Browser viewport reset afterward.
-- Original PROJECT_PLAN.md remains unchanged (SHA-256 `c63d6e9a5ccb2c6cca08928e57af64072a15a15150d8c57ba2a4a106dace9f1a`). Existing database was backed up before earlier schema changes; no database reset occurred.
+- **29/29 automated tests pass**: 19 existing Home/timer/origin tests plus 10 Habits tests. Habits coverage includes creation/edit, binary undo, quantity corrections/validation/zero, actual workouts/rest/rotation/manual plan, archive/restore, local dates and future rejection, duplicate daily constraint/retries/stale versions, reconnect, past settings preservation and old-schema upgrade retaining a running timer.
+- `npm run lint`, `npm run typecheck`, `npm run build`, `npm run format:check` and `git diff --check` passed. Production output includes `/habits`.
+- Browser tested against an isolated database on port 3127: create binary and complete/reload/undo; create reduction quantity habit, correct 3 to 1.5 and observe Within target/history without duplicates; create flexible weekly workout, record Cardio while plan stays Push, record Rest without advancement, choose Pull and move it to October 28; archive/restore Reading and reload saved values.
+- 375px viewport: no horizontal overflow, readable single-column controls and mobile navigation. Viewport restored afterward. Desktop layout inspected. Final browser error/warning query returned none.
+- Home regression: seeded schedule rendered; quick complete and undo worked; timer survived reload and paused successfully. Existing automated scheduling, rescheduling and summaries checks also pass.
+- No personal habits were created by verification. Browser data is synthetic in `/private/tmp/planner-habits-browser-20261026.db`.
 
-## Limits and next work
+## Limits and next task
 
-Physical iPhone/Safari swipe, complete screen-reader/keyboard audit and simultaneous real-device testing remain pending. Automated tests exercise database process concurrency; that is not a claim of full device verification. Manual repeated DST times expose an offset selector; fixed-event ambiguous times are rejected until an offset UI is added.
+The first version edits a daily total rather than maintaining multiple quantity increments. Values allow three decimal places. Past records retain their original settings even after same-day edits; only new records use the latest eligible revision. Records before creation and future progress are rejected. History is week-at-a-time, with date navigation.
 
-Future template-edit UI, atomic timer switching and existing-log correction remain broader M2/M3 work. Learning roadmaps, project goals, habits, job import, workouts, analytics and calendar integration are not implemented. No offline mutation queue. Time metrics count closed segments; running time is shown separately.
+Rotation advancement is explicit. Rest never advances; manually choose the next step after a Rest step. Undo of an older advancement is blocked once a later completion or manual plan change exists, preventing the current plan from being silently rewound; actual workout labels remain editable. No replay of older rotation history, advanced analytics, notifications, health/calendar integration, deployment or full Home integration in this phase.
 
-No home-server deployment or authentication has been configured. Keep local loopback access until Docker/persistent storage, owner-only Tailscale access, backup scheduling and restore testing are completed. APP_ORIGIN is an origin guard, not authentication.
+Physical iPhone Safari, VoiceOver and simultaneous real-device verification remain manual checks. Desktop responsive testing is not native-device certification. No offline write queue.
 
-Next recommended slice: physical-phone verification and any resulting interaction fixes, then separately authorize the remaining M2/M3 workflow work before starting Learning/Projects. Read TASKS.md and SPRINT_1.md rather than restarting completed foundation work.
+**Next:** add a compact selected-date Habits section to Home using these same services/records and quick controls, then verify edits from Home and Habits stay consistent. Keep task/habit completion and time metrics independent. Foundation is ready for that integration; do not rebuild Habits or begin deployment in this phase.
+
+## Historical Home completion record
+
+Current phase: **Home completion finished for the current daily-use scope; ready to begin Habits.**
+Last verified: 2026-10-26.
+
+## Recovery and audit
+
+Reviewed AGENTS.md, the original PROJECT_PLAN.md, task/progress/design/architecture docs, Git status and every interrupted source change. Base commit was `08d9c9d`; the earlier Home work was still uncommitted. Preserved it rather than scaffolding again. No commit or push performed.
+
+Already working before interruption: Monday–Sunday desktop week, mobile day/date controls, exact recurring study schedule, optional Sunday, flexible suggested times, occurrence create/edit/move/skip/restore, completion/undo, persistent timer, manual logs, loading/empty/error states and Midnight Focus styling. Existing 14 tests had passed.
+
+Partially implemented at interruption: atomic timer switching, correction UI/services, original-session finish targeting, persistent save errors, fixed-time ordering, desktop daily summaries and inclusive planned totals. These lacked regression tests, browser validation and current documentation. Priority changes and Habits preparation were not yet documented.
+
+## Completed after resume
+
+- Reviewed and retained the interrupted implementation; added focused regression coverage for timer switching/rollback/retries/stale targeting, correction conflicts/overlap/future rejection, summary denominators and fixed-time ordering.
+- Browser-verified switch and stop-and-complete. Found and fixed stale read-only recorded totals inside an open task dialog after a correction; editable fields still retain optimistic-version protection.
+- Verified correction preserves the session and task completion, with totals refreshed from saved data. Corrected one synthetic session to 25 minutes, then moved its task to the following day: recorded time correctly remained on the day worked.
+- Updated the priority order: Home → Habits → private deployment → Learning/Projects → Jobs/integrations. Documented minimal Habits schema/services/Home integration and workout rotation design without implementing Habits.
+
+## Verification
+
+- 19/19 automated tests pass, using synthetic databases. Existing tests additionally cover persistence/restart, schedule generation/moved occurrence identity, completion undo, input validation, cross-midnight/DST and competing timer processes.
+- Lint, typecheck and production build pass; final formatting checked at completion.
+- Isolated production preview on port 3126 with `/private/tmp/planner-home-verification-20261026.db`; personal database untouched. Browser verified seeded week, switch confirmation, stop-and-complete, persisted completion after reload, session correction, reschedule with source/destination identity, skipped activity, and mobile next-day navigation.
+- Final-build browser recheck: correcting the synthetic session from 25 to 20 minutes immediately updated the open dialog total; browser error/warning log was empty.
+- At 375px, no horizontal overflow; responsive single-day agenda and summary visible. Desktop seven-column summaries inspected. Native iPhone touch/Safari is not covered by desktop viewport testing.
+- No database schema changes, dependency upgrades or migrations in this follow-up. Original long-term plan remains unchanged.
+
+## Readiness and limits
+
+Home's current checklist is functional for local daily use: schedule, completion/undo, move/skip, timers, manual logs/corrections and honest daily/weekly summaries are available directly on Home. Running time remains separate from closed-session totals. No claim that the entire long-term Home/product plan is complete.
+
+Manual gates: real iPhone Safari swipe/scroll, phone lock/reconnect, two actual devices and full screen-reader/keyboard audit. Offline writes are not queued; reconnect before saving. Fixed events reject ambiguous DST local times. Future template editor/deletion suppression, a dedicated unfinished-earlier section, completed-task collapsing and timezone settings UI remain long-term polish; date navigation and per-occurrence editing work now. Habit/deadline sections depend on their future modules. These do not block the basic Habits foundation.
+
+Not deployed: local loopback only until owner-only access, Docker/persistent storage, consistent backups and restore rehearsal are verified. Prior development-tool audit/ESLint compatibility caveats remain documented in DECISIONS.md and the historical sprint record.
+
+## Next task
+
+Begin the binary/quantity Habits persistence slice: back up the existing database, add the four habit tables and migration, implement validated retry-safe entries/target snapshots, and test history invariants. Then integrate daily controls into Home, followed by history/statistics and flexible workout rotation. Do not start Learning/Projects before the new deployment priority.

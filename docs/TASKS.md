@@ -1,6 +1,59 @@
 # Development tasks
 
-Current phase: **Sprint 1 A–F implemented; verification and limits in PROGRESS.md**. The broader release backlog below is not the sprint completion checklist. See SPRINT_1.md.
+Current phase: **Phase 3 goal directions and in-calendar habit logging complete; ready for deployment preparation.**
+
+## Active priority order
+
+1. Home completion and polish (current phase completed within the verification limits in PROGRESS.md).
+2. Habits integrated directly into Home: binary/quantity first, then flexible workouts and history.
+3. Home-server deployment for daily Mac/iPhone use, with private access and verified backups.
+4. Learning Roadmaps and Projects.
+5. Job Application Tracker and integrations.
+
+This order supersedes the original milestone ordering and release gate, not the long-term requirements. Milestone IDs below remain stable references. The daily-use MVP gate is Home + Habits + deployment; Learning/Projects no longer block deployment. Home calendar logging and the separate Habits management/history page are functional. Monthly statistics remain future work.
+
+## Phase 3 — goal directions and Home calendar integration
+
+- [x] Verify interrupted goal-direction implementation and safe legacy defaults.
+- [x] Build/limit/avoid with explicit zero, historical corrections and neutral rest.
+- [x] Replace the separate Home controls section with compact clickable habit items inside both calendar views.
+- [x] Derive date-range items without task copies; weekday/flexible schedules, explicit workout moves, archives and recorded history.
+- [x] Binary/quantity/workout date-specific popup with Save and close, version protection, retained errors and unsaved-change confirmation.
+- [x] Calendar refresh after writes; shared focus/reconnect polling and separate task metrics.
+- [x] Automated regression suite, lint, typecheck, formatting, build and desktop/mobile browser checks.
+- [x] Update the product plan, architecture and design decisions to reflect calendar-first logging.
+- [ ] Physical iPhone swipe, lock/reconnect, VoiceOver and two-device verification.
+- [ ] Optional later: monthly indicators, selected-period consistency and unit-safe totals/averages (not part of this resumed sprint).
+- [ ] Next: deployment preparation with server/access details, Docker, private HTTPS and verified backup/restore. Do not deploy automatically.
+
+## Phase 2 — Habits Foundation
+
+- [x] Preserve existing Home changes and verify the existing migration/data path.
+- [x] Add binary, quantity and workout types with create/edit/archive/restore.
+- [x] Add daily, selected-weekday and flexible N-days-per-week schedules.
+- [x] Add optional minimum/maximum quantity targets and awareness-only tracking.
+- [x] Persist one versioned daily record; edit/clear/undo without duplicate records.
+- [x] Preserve old type/unit/target/schedule through immutable settings revisions.
+- [x] Record actual versus planned workout; explicit rotation advance, latest undo, rest and manual next-step/date controls.
+- [x] Build responsive Habits page with date selection, quick logging and weekly history.
+- [x] Back up database, apply additive migration and compare pre-existing tables unchanged.
+- [x] Pass all tests, lint, typecheck, formatting and production build; verify browser flows and Home regression.
+- [ ] Physical iPhone Safari, voiceover and two real devices (manual verification).
+- [x] Selected-date habit logging on Home using the same services and records (Phase 3 calendar dialogs).
+
+Phase 2 scope: daily totals (not multiple increments), three-decimal quantities, no records before creation/future dates, and no replay of older rotation advances. Historical actual workout labels remain editable. See PROGRESS.md for evidence and limits.
+
+## Home completion follow-up
+
+- [x] Audit actual UI, services, schema, commands and existing tests.
+- [x] Sort fixed/suggested activities by local start; show daily summaries on desktop and mobile.
+- [x] Preserve optional/skipped planned time; disclose overlap and separate completion from time.
+- [x] Confirm atomic timer switch and stop-with-completion/skip from Home.
+- [x] Correct saved timer/manual sessions with stale-edit and overlap protection.
+- [x] Keep finish dialogs attached to their original session; retain mutation errors during polling.
+- [x] Automated regression checks and production-browser interactions.
+- [x] Document minimum Habits architecture and preserve future requirements.
+- [ ] Real iPhone Safari swipe/lock/reconnect and full assistive-technology testing.
 
 Legend: `[x]` verified complete; `[ ]` pending; `[ ] BLOCKED — reason` requires a missing dependency/decision. Future phases are pending, not currently blocked. Never check a task merely because code was written.
 
@@ -55,16 +108,16 @@ Acceptance: No duplicates or regenerated moved/deleted occurrences; preserved ex
 Dependency: After M2.
 
 - [x] Add time-entry schema and unique open-segment constraint.
-- [ ] Atomic timer switching (retry-safe start, pause/resume and stop already implemented).
+- [x] Atomic timer switching with explicit confirmation, expected session and retry safety.
 - [x] Add persistent timer display and multi-device reconciliation.
-- [ ] Existing-log correction (manual addition and overlap confirmation already implemented).
+- [x] Existing-log correction with stale-edit checks and overlap confirmation.
 - [x] Test restart recovery, concurrent starts, retried stops, midnight and DST.
 
 Acceptance: Closing browser/restarting app preserves timer; one running segment; completion never invents time.
 
 ## M4 — learning and projects
 
-Dependency: After M3.
+Dependency: After Habits and deployment (new priority 4).
 
 - [ ] Create roadmap/milestone/item CRUD, ordering, progress and resource links.
 - [ ] Create projects/goals/deadlines using shared tasks.
@@ -75,18 +128,19 @@ Acceptance: Task completion does not auto-complete learning items/goals; archive
 
 ## M5 — habits and MVP summary
 
-Dependency: After M4.
+Dependency: After verified Home (new priority 2); Learning/Projects are not prerequisites.
 
-- [ ] Add boolean/quantity habits, effective rules and daily target snapshots.
-- [ ] Add retry-safe entry controls, correction and weekly history.
+- [x] Add boolean/quantity/workout habits, dated settings revisions and daily record snapshots.
+- [x] Add retry-safe daily controls, correction and weekly history on Habits.
 - [ ] Add Home month circles, quantity averages and weekly time/completion summary.
-- [ ] Test target changes, units, future/optional exclusion and documented five-day average fixture.
+- [x] Test settings/unit changes, historical corrections, future rejection and local dates.
+- [ ] Add monthly adherence/quantity averages and the documented five-day average fixture during Home integration.
 
 Acceptance: History remains stable; entries aggregate correctly; Home displays distinct daily states and correct averages.
 
 ## M6 — deploy and use MVP
 
-Dependency: After M0–M5; server details/access decisions required.
+Dependency: Verified Home and Habits; server details/access decisions required (new priority 3).
 
 - [ ] Confirm server OS/CPU, storage and owner-only access model.
 - [ ] Create Docker/Compose with persistent local storage and startup migrations.
@@ -98,7 +152,7 @@ Acceptance: Data survives replacement; verified restore; authorized devices conn
 
 ## M7 — applications and import
 
-Dependency: After MVP gate.
+Dependency: After daily-use MVP and Learning/Projects (new priority 5).
 
 - [ ] Add application records, status history and linked follow-up tasks.
 - [ ] Add CSV/XLSX sheet/header mapping and validation preview.
@@ -110,10 +164,11 @@ Acceptance: Only accepted rows commit; retry creates no duplicates; dangerous ex
 
 ## M8 — workout rotation and analytics
 
-Dependency: After MVP gate; M7 precedes application analytics.
+Dependency: Basic flexible workout rotation joins Habits priority 2; broader analytics stays later and application analytics follows M7.
 
-- [ ] Add versioned workout steps and completion/rest/override/undo.
-- [ ] Protect concurrent/double completions and preserve historical step labels.
+- [x] Add simple revision-preserved rotation with explicit completion advance/rest/manual next/latest undo.
+- [ ] Add older rotation-event replay if needed after daily use.
+- [x] Protect retry/stale/double completions and preserve historical planned/actual labels.
 - [ ] Add date-filtered analytics with accessible tables and exports.
 - [ ] Compare time/habit/workout totals against hand-calculated fixtures.
 

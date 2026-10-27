@@ -14,6 +14,13 @@ import { Button } from "@/components/ui/button";
 import { TaskDialog } from "./task-dialog";
 import { TaskTimer } from "@/features/timer/task-timer";
 import { SessionLog } from "@/features/timer/session-log";
+import { Dialog } from "@/components/ui/dialog";
+import { useTimer } from "@/features/timer/timer-provider";
+import { compareAgenda, completionLabel } from "@/lib/home";
+import { CalendarHabit } from "@/features/habits/calendar-habit";
+import { HabitLogDialog } from "@/features/habits/habit-log-dialog";
+import { useHabitCalendar } from "@/features/habits/use-habits";
+import type { HabitView } from "@/lib/habit-types";
 import { TaskCard } from "./task-card";
 import { addDays, weekStart, localDate, formatDuration } from "@/lib/dates";
 import { loadJson, sendCommand } from "@/lib/api";
@@ -43,10 +50,20 @@ export function Dashboard() {
     data: HomeData;
   } | null>(null);
   const [error, setError] = useState("");
+  const [saveError, setSaveError] = useState("");
+  const [completeTarget, setCompleteTarget] = useState<Task | null>(null);
+  const timer = useTimer();
   const [busy, setBusy] = useState(false);
   const [selected, setSelected] = useState<Task | null | undefined>(undefined);
   const start = weekStart(date);
   const end = addDays(start, 6);
+  const habitCalendar = useHabitCalendar(start, end);
+  const [habitTarget, setHabitTarget] = useState<{
+    habit: HabitView;
+    date: string;
+    today: string;
+  } | null>(null);
+  const [habitSaved, setHabitSaved] = useState("");
   const data = loaded?.start === start ? loaded.data : null;
   const loading = !data && !error;
   const touch = useRef<{ x: number; y: number } | null>(null);
@@ -90,19 +107,25 @@ export function Dashboard() {
       window.removeEventListener("planner:changed", refreshEvent);
     };
   }, [start, end]);
-  async function complete(task: Task) {
+  async function complete(task: Task, stopRunning = false) {
+    if (!stopRunning && timer.running?.taskId === task.id) {
+      setCompleteTarget(task);
+      return;
+    }
     setBusy(true);
-    setError("");
+    setSaveError("");
     try {
       await sendCommand({
         action: "status",
         id: task.id,
         version: task.version,
         status: task.status === "done" ? "pending" : "done",
+        stopRunning,
       });
-      await reload();
+      setCompleteTarget(null);
+      reload();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not save.");
+      setSaveError(e instanceof Error ? e.message : "Could not save.");
     } finally {
       setBusy(false);
     }
@@ -126,13 +149,9 @@ export function Dashboard() {
     const list =
       data?.tasks
         .filter((t) => t.plannedDate === day)
-        .sort(
-          (a, b) =>
-            Number(a.status === "done" || a.status === "skipped") -
-              Number(b.status === "done" || b.status === "skipped") ||
-            (a.suggestedTime ?? "99").localeCompare(b.suggestedTime ?? "99") ||
-            a.category.localeCompare(b.category),
-        ) ?? [];
+        .sort((a, b) => compareAgenda(a, b, data!.timezone)) ?? [];
+    const dayHabits =
+      habitCalendar.data?.days.find((d) => d.date === day)?.habits ?? [];
     return (
       <div className="space-y-2">
         {list.length ? (
@@ -148,13 +167,28 @@ export function Dashboard() {
               <TaskTimer task={task} />
             </TaskCard>
           ))
-        ) : (
+        ) : !dayHabits.length && habitCalendar.data ? (
           <div className="rounded-lg border border-dashed border-border px-3 py-7 text-center text-xs leading-relaxed text-muted">
             Room to breathe.
             <br />
             No activities planned.
           </div>
-        )}
+        ) : null}
+        {dayHabits.map((h) => (
+          <CalendarHabit
+            key={`habit:${h.id}:${day}`}
+            habit={h}
+            date={day}
+            today={habitCalendar.data!.today}
+            onOpen={() =>
+              setHabitTarget({
+                habit: h,
+                date: day,
+                today: habitCalendar.data!.today,
+              })
+            }
+          />
+        ))}
       </div>
     );
   }
@@ -215,7 +249,7 @@ export function Dashboard() {
                 key={v}
                 aria-pressed={view === v}
                 onClick={() => changeView(v)}
-                className={`min-h-9 rounded-md px-4 text-xs capitalize ${view === v ? "bg-elevated text-foreground" : "text-muted"}`}
+                className={`min-h-11 rounded-md px-4 text-xs capitalize ${view === v ? "bg-elevated text-foreground" : "text-muted"}`}
               >
                 {v}
               </button>
@@ -228,6 +262,31 @@ export function Dashboard() {
             {data?.timezone ?? "America/Toronto"} · Suggested times are flexible
           </span>
         </div>
+        {habitCalendar.error && (
+          <div role="alert" className="mb-3 text-sm text-danger">
+            {habitCalendar.error} Habit entries may be unavailable.{" "}
+            <Button onClick={habitCalendar.reload}>Retry habits</Button>
+          </div>
+        )}
+        {!habitCalendar.data && !habitCalendar.error && (
+          <p role="status" className="mb-3 text-sm text-muted">
+            Loading calendar habits…
+          </p>
+        )}
+        {habitSaved && (
+          <p role="status" className="mb-3 text-sm text-success">
+            {habitSaved}
+          </p>
+        )}
+        {saveError && (
+          <div
+            role="alert"
+            className="mb-4 rounded-lg border border-danger/40 p-3 text-danger"
+          >
+            {saveError}{" "}
+            <Button onClick={() => setSaveError("")}>Dismiss</Button>
+          </div>
+        )}
         {error && (
           <div
             role="alert"
@@ -265,6 +324,26 @@ export function Dashboard() {
                           {DateTime.fromISO(day).day}
                         </span>
                       </div>
+                      <p className="mb-2 text-[11px] text-muted">
+                        {completionLabel(
+                          data.metrics.days.find((d) => d.date === day)?.done ??
+                            0,
+                          data.metrics.days.find((d) => d.date === day)
+                            ?.required ?? 0,
+                        )}
+                      </p>
+                      <p className="mb-3 text-[11px] text-muted">
+                        {formatDuration(
+                          (data.metrics.days.find((d) => d.date === day)
+                            ?.plannedMinutes ?? 0) * 60000,
+                        )}{" "}
+                        planned ·{" "}
+                        {formatDuration(
+                          data.metrics.days.find((d) => d.date === day)
+                            ?.trackedMs ?? 0,
+                        )}{" "}
+                        recorded
+                      </p>
                       {agenda(day)}
                     </section>
                   ))}
@@ -294,13 +373,17 @@ export function Dashboard() {
                     {DateTime.fromISO(date).toFormat("cccc, MMMM d")}
                   </h3>
                   <span className="text-xs text-muted">
-                    {selectedStats?.done ?? 0}/{selectedStats?.required ?? 0}{" "}
-                    required · {percent}%
+                    {completionLabel(
+                      selectedStats?.done ?? 0,
+                      selectedStats?.required ?? 0,
+                    )}
                   </span>
                 </div>
                 <p className="mb-3 text-xs text-muted">
-                  {formatDuration(selectedStats?.trackedMs ?? 0)} recorded this
-                  day
+                  {formatDuration((selectedStats?.plannedMinutes ?? 0) * 60000)}{" "}
+                  planned · {formatDuration(selectedStats?.trackedMs ?? 0)}{" "}
+                  recorded this day · {selectedStats?.skipped ?? 0} required
+                  skipped
                 </p>
                 <progress
                   aria-label="Daily completion"
@@ -310,7 +393,11 @@ export function Dashboard() {
                 />
                 <div
                   style={{ touchAction: "pan-y" }}
+                  onTouchCancel={() => {
+                    touch.current = null;
+                  }}
                   onTouchStart={(event) => {
+                    touch.current = null;
                     if (
                       (event.target as HTMLElement).closest(
                         "button,a,input,select,textarea",
@@ -340,6 +427,7 @@ export function Dashboard() {
           )
         )}
       </section>
+
       {data && (
         <section
           aria-label="This week at a glance"
@@ -354,7 +442,7 @@ export function Dashboard() {
               {
                 label: "Completed",
                 value: String(data.metrics.completed),
-                detail: "activities this week",
+                detail: `${data.metrics.optionalCompleted} optional completed · ${data.metrics.skipped} skipped`,
                 icon: CheckCheck,
               },
               {
@@ -374,7 +462,7 @@ export function Dashboard() {
               {
                 label: "Planned / recorded",
                 value: `${formatDuration(data.metrics.plannedMinutes * 60000)} / ${formatDuration(data.metrics.trackedMs)}`,
-                detail: "required plan / all recorded time",
+                detail: "all planned activities / time worked this week",
                 icon: CalendarDays,
               },
             ].map((metric) => (
@@ -395,21 +483,62 @@ export function Dashboard() {
               </div>
             ))}
           </div>
+          {data.metrics.overlapConfirmed && (
+            <p className="mt-4 text-xs text-warning">
+              Includes intentionally overlapping sessions. Recorded totals can
+              exceed elapsed time.
+            </p>
+          )}
           {data.metrics.trackedMs === 0 && (
             <p className="mt-4 text-xs text-muted">
               Your first recorded session will start your time history.
             </p>
           )}
-          <div className="mt-6 rounded-lg border border-dashed border-border p-4 text-xs text-muted">
-            Habits and longer-term trends will join this space in a later
-            sprint.
-          </div>
         </section>
       )}
+      {habitTarget && (
+        <HabitLogDialog
+          key={`${habitTarget.habit.id}:${habitTarget.date}`}
+          {...habitTarget}
+          onClose={() => setHabitTarget(null)}
+          onSaved={() => {
+            setHabitSaved(
+              `${habitTarget.habit.dateConfig!.name} saved for ${habitTarget.date}.`,
+            );
+            setHabitTarget(null);
+            habitCalendar.reload();
+          }}
+        />
+      )}
+      <Dialog
+        open={completeTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && !busy) setCompleteTarget(null);
+        }}
+        title="Stop timer and complete?"
+        description="Your recorded time will be saved and this activity marked complete together."
+      >
+        <p className="mb-4">{completeTarget?.title}</p>
+        {saveError && (
+          <p role="alert" className="mb-3 text-danger">
+            {saveError}
+          </p>
+        )}
+        <Button
+          disabled={busy}
+          variant="primary"
+          onClick={() => {
+            if (completeTarget) void complete(completeTarget, true);
+          }}
+        >
+          Stop timer and complete
+        </Button>
+      </Dialog>
       {selected !== undefined && (
         <TaskDialog
           key={selected?.id ?? "new"}
           task={selected}
+          liveTask={data?.tasks.find((t) => t.id === selected?.id)}
           date={date}
           timezone={data?.timezone ?? "America/Toronto"}
           onClose={() => {

@@ -43,3 +43,27 @@ Use better-sqlite3/Drizzle with transactions and database constraints for single
 Browser testing exposed Next's internal localhost URL normalization when the browser uses 127.0.0.1. Validate the actual Host and Origin pair (or explicit APP_ORIGIN), not the normalized request URL hostname. Regression tests cover foreign hosts/origins and configured proxy origins.
 
 Retry the same payload with its original mutation key after uncertain network/server failure. A fresh key after failure could duplicate saved manual logs. Browser test data uses a separate temporary database.
+
+## 2026-10-26 — New daily-use priorities and Home completion
+
+Latest user instructions supersede milestone order: Home, Habits, deployment, Learning/Projects, Jobs/integrations. Preserve the original specification rather than deleting later requirements. Basic workout rotation now belongs to the Habits sequence; richer analytics remains later. No Habits implementation during Home verification.
+
+Home follow-up now supports atomic confirmed timer switching and saved-session correction. Corrections compare original values under an immediate transaction, preserving identity and source; no schema migration required. Planned minutes include optional and skipped activities to match the original reporting definition. Actual minutes are allocated to worked dates, not a moved task's date.
+
+## 2026-10-26 — Habits Foundation: daily records and immutable settings
+
+The latest phase asks for three types, editable type/unit/target/schedule, duplicate daily prevention and simple workout rotation. Implement one daily total/state record per habit/date, with a unique index and optimistic version, rather than the original multi-increment model. Store quantity as integer thousandths; allow zero, optional minimum/maximum targets and awareness-only. No maximizing assumption. Multi-increment logging remains a future deliberate extension.
+
+Use three additive tables: stable habits, immutable effective-date configuration revisions, and daily records referencing their original revision. Configuration JSON is validated server-side; no separate tables are needed for every small setting or rotation step in this version. This supports editing type/unit without silently converting historical data, superseding the earlier immutable-unit UI proposal. Existing recorded dates keep their old definition; new dates use the latest eligible revision.
+
+Reuse the same guarded planner endpoint and transactional mutation receipts. Explicit expected versions protect updates and rotation changes. Missed/rest days do not advance; alternate actual workout is saved separately; advancement requires an explicit choice. Undo only the latest unchanged pointer effect; reject earlier rewind rather than implementing event replay. Manual next-step/date changes are independent of historical records.
+
+Migration is additive and was preceded by a consistent verified backup. No Home integration or changes to Home's data model in this phase.
+
+## 2026-10-27 — Goal direction and calendar-first habit logging
+
+Keep measurement and goal direction separate. Extend validated configuration JSON with build/limit/avoid; interpret older revisions with safe read-time defaults instead of rewriting history. Retain awareness-only quantities and normalize new limits/avoid targets. The existing three-table schema is sufficient; no migration/reset needed.
+
+The clarified resume request supersedes the interrupted separate Home Habits section. Derive date-specific habit cards and render them through the existing agenda, with a small dedicated card rather than adding habit branches to task-specific timer controls. Do not create task copies. Reuse the existing services, command transport and Radix dialog; keep a captured versioned draft until saved or explicitly discarded.
+
+Flexible weekly habits are available on any day and labeled flexible. An explicit workout date overrides unrecorded future schedule placement. Archived and unscheduled recorded history stays visible, while new archived/unscheduled instances do not appear. Future rotation labels show the current pending step only; no date-based advance. Monthly analytics and deployment stay outside this sprint.

@@ -1,3 +1,4 @@
+import { getHabits, getHabitCalendar } from "@/server/services/habits";
 import { guardRequest } from "@/server/services/http";
 import { ZodError } from "zod";
 import { getStore } from "@/server/db/runtime";
@@ -37,6 +38,20 @@ export async function GET(request: Request) {
     guardRequest(request);
     const url = new URL(request.url);
     const store = getStore();
+    if (url.searchParams.get("view") === "habitCalendar")
+      return Response.json(
+        getHabitCalendar(
+          store,
+          url.searchParams.get("from") ?? "",
+          url.searchParams.get("to") ?? "",
+        ),
+        { headers: { "Cache-Control": "no-store" } },
+      );
+    if (url.searchParams.get("view") === "habits")
+      return Response.json(
+        getHabits(store, url.searchParams.get("date") ?? localDate()),
+        { headers: { "Cache-Control": "no-store" } },
+      );
     if (url.searchParams.get("view") === "timer")
       return Response.json(getRunning(store), {
         headers: { "Cache-Control": "no-store" },

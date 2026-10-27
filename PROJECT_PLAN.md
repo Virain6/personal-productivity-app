@@ -47,7 +47,10 @@ Desktop: compact sidebar with Home, Learning, Projects, Habits, Applications (wh
 - Swipe only on the calendar body, not forms, sliders, or interactive cards; vertical scrolling must continue to work. Provide buttons and keyboard equivalents. Use a movement threshold and respect reduced-motion preferences.
 - Day list: running task, scheduled tasks ordered by suggested time, then anytime tasks. Completed tasks collapse into a section.
 - Task card: title, category, planned duration, suggested start or Anytime, actual time, status, Start/Resume, Done, and a menu for Move/Skip/Edit.
-- Under agenda: today's habits and upcoming deadlines. A small summary shows required tasks done and focused time. Continue scrolling to a compact habit month calendar and quantity averages; these must be accessible directly on Home, not only on Analytics. Show a selectable habit with daily circles for complete, partial, missed, skipped, unscheduled, and future dates; use labels/icons as well as color. Tap a day to inspect or correct its entries. Workout check-off and workout type appear here when M8 is implemented.
+- Habits appear as compact clickable items inside the same desktop week columns and mobile daily agenda as study/project tasks. Show a subtle teal Habit indicator, the name, status and optional quantity or workout detail. Do not use a separate Habits section as the primary Home interaction.
+- Clicking a habit opens a date-specific logging dialog: binary completion/undo, editable quantity daily total including explicit zero, or actual workout/rest with explicit rotation advancement. Prepopulate saved entries, keep unsaved edits on failure, confirm discard, and save through the existing habit services. Future dates are view-only. Habit goals and task/time metrics stay separate; never create fake task records for habits.
+- Derive calendar items from daily/weekday/flexible-weekly schedules and dated revisions. Flexible weekly habits are available on any day and labeled as flexible; recorded voluntary or archived history remains visible. An explicit next-workout date overrides unrecorded future schedule dates without moving old records or predicting rotation advancement.
+- Upcoming deadlines and a small task/time summary remain below the agenda. A future compact habit month calendar and quantity averages remain long-term requirements, secondary to calendar logging; distinguish not logged, goal met, exceeded limit, rest, unscheduled and future days with text as well as color.
 - A separate “Unfinished earlier” section offers move, skip, or leave. Do not silently copy yesterday's work into today.
 - Suggested times that have passed remain suggestions. A flexible task is not “late” merely because its start time passed; only explicit deadlines can be overdue.
 - Task detail drawer: title, category, date, suggested time, target minutes, deadline, linked milestone/project, log history, optional short summary.
@@ -63,7 +66,7 @@ List active/completed/archived projects with deadline and next task. Detail: sho
 
 ### Habits `/habits`
 
-Today controls plus a weekly history. Checkbox habits use a single toggle; quantity habits support quick additions and editing/deleting entries. Later: workout rotation shows “Next: Pull” with Complete, Rest today, and Choose another workout.
+Habit management, configuration and weekly history. Ordinary daily logging is available directly through Home calendar dialogs. Quantity controls edit a daily total; zero is explicit and missing remains unknown. Workout rotation supports actual versus planned workout, neutral rest, explicit advancement and manual next-step/date selection.
 
 ### Applications `/applications` — after MVP
 
@@ -148,9 +151,9 @@ Example roadmap: Backend Foundations → SQL Basics, Transactions, API Design, T
 
 A habit has a name, type (`boolean` or `quantity`), weekdays, effective start/end dates, and optional daily target/unit. Example: stretch (boolean, daily), water (quantity, 2000 mL), reading (quantity, 20 pages).
 
-Store entries, not just totals. Adding 250 mL twice gives 500 mL; removing one entry gives 250 mL. Use integer base units with a declared scale if decimals are needed; never silently mix liters and milliliters. Editing a habit's unit after entries exist requires a new habit or explicit conversion migration.
+Current implementation uses one editable daily total/state per habit/local date, stored in integer thousandths. Multiple increment entries remain a possible later extension. Never silently mix units; edits create immutable dated settings revisions and existing records retain their original measurement, goal direction, target and schedule.
 
-Completion: boolean true, or daily quantity total ≥ that day's snapshotted target. Extra quantity is allowed. A habit-day stores target and eligibility so future target edits do not rewrite past adherence. Unscheduled days are excluded. Explicit skips remain distinguishable from completion; adherence includes scheduled skipped days in the denominator. Display a separate skip count. For streaks, unscheduled days are neutral and scheduled skips break the streak. Do not introduce streaks until basic tracking is reliable.
+Goal direction is separate from measurement: Build/maintain uses completion or a minimum target, Limit/reduce uses an inclusive maximum (including zero), and Avoid requires an explicitly recorded zero/not-performed observation. Awareness-only quantities remain unscored. Missing is never successful and workout rest is neutral. Evaluate each record with its original dated settings. Completion for build goals: boolean true, or daily quantity total ≥ that day's snapshotted target. Extra quantity is allowed. A habit-day stores target and eligibility so future target edits do not rewrite past adherence. Unscheduled days are excluded. Explicit skips remain distinguishable from completion; adherence includes scheduled skipped days in the denominator. Display a separate skip count. For streaks, unscheduled days are neutral and scheduled skips break the streak. Do not introduce streaks until basic tracking is reliable.
 
 ### Flexible workout rotation — after MVP
 

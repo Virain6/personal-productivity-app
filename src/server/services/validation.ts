@@ -1,3 +1,4 @@
+import { habitCommand } from "./habit-validation";
 import { z } from "zod";
 import { categories } from "../../lib/planner-types";
 import { validDate } from "../../lib/dates";
@@ -53,6 +54,25 @@ export const command = z.discriminatedUnion("action", [
   }),
   z.object({ action: z.literal("start"), id: z.string() }),
   z.object({
+    action: z.literal("switch"),
+    sessionId: z.string(),
+    id: z.string(),
+  }),
+  z.object({
+    action: z.literal("correctSession"),
+    id: z.string(),
+    expected: z.object({
+      startedAt: z.number().int(),
+      endedAt: z.number().int(),
+      summary: z.string().max(500),
+      overlapConfirmed: z.boolean(),
+    }),
+    startedAt: z.number().int(),
+    endedAt: z.number().int(),
+    summary: z.string().max(500),
+    overlapConfirmed: z.boolean(),
+  }),
+  z.object({
     action: z.literal("stop"),
     sessionId: z.string(),
     summary: z.string().max(500).default(""),
@@ -68,7 +88,13 @@ export const command = z.discriminatedUnion("action", [
     summary: z.string().max(500).default(""),
   }),
 ]);
-export const mutation = z.object({ operationKey: z.string().uuid(), command });
+export const mutation = z.object({
+  operationKey: z.string().uuid(),
+  command: z.discriminatedUnion("action", [
+    ...command.options,
+    ...habitCommand.options,
+  ]),
+});
 export class DomainError extends Error {
   constructor(
     message: string,

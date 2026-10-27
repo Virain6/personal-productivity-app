@@ -44,6 +44,10 @@ export function getDashboard(
       days.push({
         date,
         required: dayTasks.length,
+        skipped: dayTasks.filter((t) => t.status === "skipped").length,
+        plannedMinutes: rows
+          .filter((t) => t.plannedDate === date)
+          .reduce((n, t) => n + t.targetMinutes, 0),
         done: dayTasks.filter((t) => t.status === "done").length,
         trackedMs: allSessions
           .filter((s) => s.endedAt !== null)
@@ -70,12 +74,20 @@ export function getDashboard(
       today,
       timezone: config.timezone,
       metrics: {
+        skipped: rows.filter((t) => t.status === "skipped").length,
+        optionalCompleted: rows.filter((t) => t.optional && t.status === "done")
+          .length,
+        overlapConfirmed: allSessions.some(
+          (s) =>
+            s.overlapConfirmed &&
+            s.endedAt !== null &&
+            s.startedAt < dayBounds(to, config.timezone)[1] &&
+            s.endedAt > dayBounds(from, config.timezone)[0],
+        ),
         completed: rows.filter((t) => t.status === "done").length,
         required: due.length,
         requiredDone: due.filter((t) => t.status === "done").length,
-        plannedMinutes: rows
-          .filter((t) => !t.optional && t.status !== "skipped")
-          .reduce((n, t) => n + t.targetMinutes, 0),
+        plannedMinutes: rows.reduce((n, t) => n + t.targetMinutes, 0),
         trackedMs: days.reduce((n, d) => n + d.trackedMs, 0),
         days,
       },

@@ -96,7 +96,7 @@ export function AppShell({ children }: Readonly<{ children: ReactNode }>) {
         <main
           id="main-content"
           tabIndex={-1}
-          className="mx-auto max-w-[1600px] px-4 pb-28 pt-7 md:px-7 md:pb-16 lg:px-9"
+          className="mx-auto max-w-[1600px] px-4 pb-64 pt-7 md:px-7 md:pb-40 lg:px-9"
         >
           {children}
         </main>

@@ -134,3 +134,69 @@ export const receipts = sqliteTable("mutation_receipts", {
   result: text("result").notNull(),
   createdAt: integer("created_at").notNull(),
 });
+
+// Habits are independent of study tasks/timers. Immutable revisions preserve old units/types/targets.
+export const habits = sqliteTable(
+  "habits",
+  {
+    id: text("id").primaryKey(),
+    version: integer("version").notNull().default(1),
+    archived: integer("archived", { mode: "boolean" }).notNull().default(false),
+    createdDate: text("created_date").notNull(),
+    createdAt: integer("created_at").notNull(),
+    updatedAt: integer("updated_at").notNull(),
+    nextIndex: integer("next_index").notNull().default(0),
+    nextDate: text("next_date"),
+    cursorVersion: integer("cursor_version").notNull().default(0),
+  },
+  (t) => [check("habit_index", sql`${t.nextIndex}>=0`)],
+);
+export const habitRevisions = sqliteTable(
+  "habit_revisions",
+  {
+    id: text("id").primaryKey(),
+    habitId: text("habit_id")
+      .notNull()
+      .references(() => habits.id),
+    version: integer("version").notNull(),
+    effectiveDate: text("effective_date").notNull(),
+    config: text("config", { mode: "json" })
+      .$type<import("../../lib/habit-types").HabitConfig>()
+      .notNull(),
+  },
+  (t) => [uniqueIndex("habit_revision_version").on(t.habitId, t.version)],
+);
+export const habitRecords = sqliteTable(
+  "habit_records",
+  {
+    id: text("id").primaryKey(),
+    habitId: text("habit_id")
+      .notNull()
+      .references(() => habits.id),
+    date: text("local_date").notNull(),
+    revisionId: text("revision_id")
+      .notNull()
+      .references(() => habitRevisions.id),
+    version: integer("version").notNull().default(1),
+    state: text("state", {
+      enum: ["unlogged", "done", "notDone", "rest"],
+    }).notNull(),
+    quantityMilli: integer("quantity_milli"),
+    workout: text("workout").notNull().default(""),
+    plannedWorkout: text("planned_workout").notNull().default(""),
+    advancedFrom: integer("advanced_from"),
+    advanceCursor: integer("advance_cursor"),
+    updatedAt: integer("updated_at").notNull(),
+  },
+  (t) => [
+    uniqueIndex("habit_daily_identity").on(t.habitId, t.date),
+    check(
+      "habit_quantity",
+      sql`${t.quantityMilli} IS NULL OR (${t.quantityMilli}>=0 AND ${t.quantityMilli}<=1000000000000)`,
+    ),
+    check(
+      "habit_record_state",
+      sql`${t.state} IN ('unlogged','done','notDone','rest')`,
+    ),
+  ],
+);

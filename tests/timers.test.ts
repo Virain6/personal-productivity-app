@@ -205,3 +205,187 @@ test("two independent processes cannot start two timers", async () => {
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("timer switch is atomic, retry-safe and rejects stale session identity", () => {
+  const { s, id } = setup();
+  try {
+    const next = getDashboard(s, "2026-10-24", "2026-10-24", now).tasks.find(
+      (t) => t.id !== id,
+    )!;
+    const first = cmd(s, { action: "start", id }).id!;
+    assert.throws(
+      () =>
+        cmd(
+          s,
+          { action: "switch", sessionId: first, id: "missing" },
+          now + 60000,
+        ),
+      /not found/,
+    );
+    assert.equal(getRunning(s).running?.id, first);
+    const request = {
+      operationKey: crypto.randomUUID(),
+      command: { action: "switch", sessionId: first, id: next.id },
+    };
+    const result = mutate(s, request, now + 60000);
+    assert.deepEqual(mutate(s, request, now + 90000), result);
+    assert.equal(getRunning(s).running?.taskId, next.id);
+    assert.throws(
+      () =>
+        cmd(
+          s,
+          { action: "stop", sessionId: first, summary: "stale dialog" },
+          now + 120000,
+        ),
+      /already stopped/,
+    );
+    assert.throws(
+      () => cmd(s, { action: "switch", sessionId: first, id }, now + 120000),
+      /changed/,
+    );
+    assert.equal(getRunning(s).running?.id, result.id);
+    assert.equal(s.db.select().from(sessions).all().length, 2);
+  } finally {
+    s.sqlite.close();
+  }
+});
+test("session correction preserves identity/completion, updates totals, rejects stale/overlap/future edits", () => {
+  const { s, id } = setup();
+  try {
+    const sessionId = cmd(s, {
+      action: "manual",
+      id,
+      startedAt: now - 3600000,
+      endedAt: now - 1800000,
+    }).id!;
+    const old = s.db
+      .select()
+      .from(sessions)
+      .where(eq(sessions.id, sessionId))
+      .get()!;
+    const expected = {
+      startedAt: old.startedAt,
+      endedAt: old.endedAt,
+      summary: old.summary,
+      overlapConfirmed: old.overlapConfirmed,
+    };
+    const correction = {
+      action: "correctSession",
+      id: sessionId,
+      expected,
+      startedAt: old.startedAt,
+      endedAt: now - 2400000,
+      summary: "Corrected",
+      overlapConfirmed: false,
+    };
+    const request = { operationKey: crypto.randomUUID(), command: correction };
+    mutate(s, request, now);
+    mutate(s, request, now);
+    assert.equal(
+      getDashboard(s, "2026-10-24", "2026-10-24", now).tasks.find(
+        (t) => t.id === id,
+      )?.actualMs,
+      1200000,
+    );
+    assert.equal(
+      s.db.select().from(tasks).where(eq(tasks.id, id)).get()?.status,
+      "pending",
+    );
+    assert.throws(() => cmd(s, correction), /changed/);
+    const updated = {
+      ...expected,
+      endedAt: now - 2400000,
+      summary: "Corrected",
+    };
+    assert.throws(
+      () => cmd(s, { ...correction, expected: updated, endedAt: now + 1 }),
+      /past/,
+    );
+    cmd(s, {
+      action: "manual",
+      id,
+      startedAt: now - 1800000,
+      endedAt: now - 600000,
+    });
+    assert.throws(
+      () => cmd(s, { ...correction, expected: updated, endedAt: now - 900000 }),
+      /overlaps/,
+    );
+    cmd(s, {
+      ...correction,
+      expected: updated,
+      endedAt: now - 900000,
+      overlapConfirmed: true,
+    });
+    assert.equal(
+      getDashboard(s, "2026-10-24", "2026-10-24", now).metrics.overlapConfirmed,
+      true,
+    );
+    assert.equal(s.db.select().from(sessions).all().length, 2);
+  } finally {
+    s.sqlite.close();
+  }
+});
+test("required skips remain in completion and all optional/skipped plans remain in planned time", () => {
+  const { s, id } = setup();
+  try {
+    cmd(s, { action: "status", id, version: 1, status: "skipped" });
+    const data = getDashboard(s, "2026-10-24", "2026-10-25", now);
+    assert.equal(
+      data.metrics.plannedMinutes,
+      data.tasks.reduce((n, t) => n + t.targetMinutes, 0),
+    );
+    assert.equal(
+      data.metrics.required,
+      data.tasks.filter((t) => !t.optional && t.plannedDate <= data.today)
+        .length,
+    );
+    assert.equal(data.metrics.skipped, 1);
+    assert.equal(data.metrics.days[1].required, 0);
+    assert.equal(data.metrics.days[1].plannedMinutes, 180);
+  } finally {
+    s.sqlite.close();
+  }
+});
+test("explicit stop-and-complete saves time and undo does not erase it", () => {
+  const { s, id } = setup();
+  try {
+    cmd(s, { action: "start", id });
+    let task = s.db.select().from(tasks).where(eq(tasks.id, id)).get()!;
+    assert.throws(
+      () =>
+        cmd(
+          s,
+          { action: "status", id, version: task.version, status: "done" },
+          now + 60000,
+        ),
+      /Stop/,
+    );
+    cmd(
+      s,
+      {
+        action: "status",
+        id,
+        version: task.version,
+        status: "done",
+        stopRunning: true,
+      },
+      now + 60000,
+    );
+    assert.equal(getRunning(s).running, null);
+    task = s.db.select().from(tasks).where(eq(tasks.id, id)).get()!;
+    cmd(
+      s,
+      { action: "status", id, version: task.version, status: "pending" },
+      now + 120000,
+    );
+    assert.equal(
+      getDashboard(s, "2026-10-24", "2026-10-24", now + 120000).tasks.find(
+        (t) => t.id === id,
+      )?.actualMs,
+      60000,
+    );
+  } finally {
+    s.sqlite.close();
+  }
+});

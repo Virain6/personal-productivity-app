@@ -5,6 +5,7 @@ import { categories, type Task } from "@/lib/planner-types";
 import { formatDuration, localOptions } from "@/lib/dates";
 import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useTimer } from "@/features/timer/timer-provider";
 import { sendCommand } from "@/lib/api";
 export function TaskDialog({
   task,
@@ -12,13 +13,17 @@ export function TaskDialog({
   timezone,
   onClose,
   children,
+  liveTask,
 }: {
   task: Task | null;
   date: string;
   timezone: string;
   onClose: () => void;
   children?: ReactNode;
+  liveTask?: Task;
 }) {
+  const timer = useTimer();
+  const [confirmStop, setConfirmStop] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [mode, setMode] = useState(task?.mode ?? "flexible");
@@ -65,7 +70,11 @@ export function TaskDialog({
       setBusy(false);
     }
   }
-  async function status(value: "pending" | "skipped") {
+  async function status(value: "pending" | "skipped", stopRunning = false) {
+    if (!stopRunning && timer.running?.taskId === task?.id) {
+      setConfirmStop(true);
+      return;
+    }
     setBusy(true);
     setError("");
     try {
@@ -74,6 +83,7 @@ export function TaskDialog({
         id: task!.id,
         version: task!.version,
         status: value,
+        stopRunning,
       });
       onClose();
     } catch (e) {
@@ -209,9 +219,27 @@ export function TaskDialog({
         </label>
         {task && (
           <p className="text-xs text-muted">
-            Status: {task.status.replace("_", " ")} · Recorded:{" "}
-            <span className="numeric">{formatDuration(task.actualMs)}</span>
+            Status: {(liveTask ?? task).status.replace("_", " ")} · Recorded:{" "}
+            <span className="numeric">
+              {formatDuration((liveTask ?? task).actualMs)}
+            </span>
           </p>
+        )}
+        {confirmStop && (
+          <div className="rounded-lg border border-border p-3">
+            <p className="mb-3 text-sm">
+              Save the running time and skip this activity?
+            </p>
+            <Button
+              disabled={busy}
+              onClick={() => void status("skipped", true)}
+            >
+              Stop timer and skip
+            </Button>
+            <Button variant="ghost" onClick={() => setConfirmStop(false)}>
+              Cancel
+            </Button>
+          </div>
         )}
         {error && (
           <p role="alert" className="text-danger">

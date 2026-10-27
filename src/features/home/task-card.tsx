@@ -62,7 +62,11 @@ export function TaskCard({
           {task.mode === "fixed"
             ? DateTime.fromMillis(task.fixedStart!, {
                 zone: timezone,
-              }).toFormat("HH:mm")
+              }).toFormat("HH:mm") +
+              " – " +
+              DateTime.fromMillis(task.fixedEnd!, { zone: timezone }).toFormat(
+                "MMM d, HH:mm",
+              )
             : task.suggestedTime
               ? `Suggested ${task.suggestedTime}`
               : "Anytime"}
@@ -73,6 +77,7 @@ export function TaskCard({
           {formatDuration(task.targetMinutes * 60000)} planned
         </span>
         {task.optional && <span>Optional</span>}
+        {task.status === "in_progress" && <span>In progress</span>}
         {task.status === "skipped" && <span>Skipped</span>}
         {task.status === "done" && <span className="text-success">Done</span>}
       </div>

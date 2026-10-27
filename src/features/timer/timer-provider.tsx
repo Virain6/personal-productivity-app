@@ -36,6 +36,12 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   } | null>(null);
   const [now, setNow] = useState(0);
   const [error, setError] = useState("");
+  const [connectionError, setConnectionError] = useState("");
+  const [finishTarget, setFinishTarget] = useState<Running | null>(null);
+  const [switchTarget, setSwitchTarget] = useState<{
+    sessionId: string;
+    id: string;
+  } | null>(null);
   const [busy, setBusy] = useState(false);
   const [finishOpen, setFinishOpen] = useState(false);
   const [summary, setSummary] = useState("");
@@ -54,11 +60,13 @@ export function TimerProvider({ children }: { children: ReactNode }) {
         if (active && seq === ticket) {
           setSnapshot({ ...value, received: performance.now() });
           setNow(value.serverNow);
-          setError("");
+          setConnectionError("");
         }
       } catch (e) {
         if (active && seq === ticket)
-          setError(e instanceof Error ? e.message : "Timer is disconnected.");
+          setConnectionError(
+            e instanceof Error ? e.message : "Timer is disconnected.",
+          );
       }
     }
     const refreshEvent = () => void refresh();
@@ -98,35 +106,50 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   }
   const running = snapshot?.running ?? null;
   async function start(id: string) {
+    if (running && running.taskId !== id) {
+      setError("");
+      setSwitchTarget({ sessionId: running.id, id });
+      return;
+    }
     await action({ action: "start", id });
   }
   async function pause() {
     if (running) await action({ action: "stop", sessionId: running.id });
   }
   function finish() {
+    setError("");
+    setFinishTarget(running);
     setSummary("");
     setComplete(false);
     setFinishOpen(true);
   }
   async function save() {
-    if (!running) return;
+    if (!finishTarget) return;
     try {
       await action({
         action: "stop",
-        sessionId: running.id,
+        sessionId: finishTarget.id,
         summary,
         complete,
-        version: running.taskVersion,
+        version: finishTarget.taskVersion,
       });
       setFinishOpen(false);
     } catch {}
   }
   return (
     <TimerContext.Provider
-      value={{ running, now, error, busy, start, pause, finish }}
+      value={{
+        running,
+        now,
+        error: error || connectionError,
+        busy,
+        start,
+        pause,
+        finish,
+      }}
     >
       {children}
-      {(running || error) && (
+      {(running || error || connectionError) && (
         <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-3 right-3 z-20 rounded-xl border border-accent/35 bg-surface p-3 shadow-lg md:bottom-5 md:left-auto md:w-[440px]">
           <div className="flex items-center gap-3">
             <Timer size={18} className="shrink-0 text-accent-hover" />
@@ -163,24 +186,32 @@ export function TimerProvider({ children }: { children: ReactNode }) {
               using it in your totals.
             </p>
           )}
-          {error && (
+          {(error || connectionError) && (
             <p role="alert" className="mt-2 text-xs text-danger">
-              {error}
+              {error || connectionError}
+              {error && (
+                <Button variant="ghost" onClick={() => setError("")}>
+                  Dismiss
+                </Button>
+              )}
             </p>
           )}
         </div>
       )}
       <Dialog
         open={finishOpen}
-        onOpenChange={setFinishOpen}
+        onOpenChange={(open) => {
+          if (!busy) setFinishOpen(open);
+        }}
         title="Finish your session"
         description="Review your time. Saving does not automatically complete the activity."
       >
         <p className="numeric mb-4 text-2xl">
-          {running
-            ? clockDuration(now - running.startedAt)
+          {finishTarget && running?.id === finishTarget.id
+            ? clockDuration(now - finishTarget.startedAt)
             : "Session already stopped"}
         </p>
+        <p className="mb-3 text-sm">{finishTarget?.title}</p>
         <label>
           What did you work on?
           <textarea
@@ -205,10 +236,36 @@ export function TimerProvider({ children }: { children: ReactNode }) {
         )}
         <Button
           variant="primary"
-          disabled={busy || !running}
+          disabled={busy || !finishTarget}
           onClick={() => void save()}
         >
           Save session
+        </Button>
+      </Dialog>
+      <Dialog
+        open={switchTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && !busy) setSwitchTarget(null);
+        }}
+        title="Switch your focus?"
+        description="Save the current session and start the selected activity. Neither activity is marked complete."
+      >
+        {error && (
+          <p role="alert" className="mb-3 text-danger">
+            {error}
+          </p>
+        )}
+        <Button
+          variant="primary"
+          disabled={busy}
+          onClick={() => {
+            if (switchTarget)
+              void action({ action: "switch", ...switchTarget })
+                .then(() => setSwitchTarget(null))
+                .catch(() => {});
+          }}
+        >
+          Stop current and start selected
         </Button>
       </Dialog>
     </TimerContext.Provider>

@@ -3,7 +3,7 @@
 ## Read before work
 
 - Read PROJECT_PLAN.md before significant feature or architecture changes, then docs/TASKS.md, docs/PROGRESS.md, and the relevant existing code.
-- Follow the latest user-authorized sprint scope recorded in docs/SPRINT_1.md and docs/DECISIONS.md. The canonical progress file is docs/PROGRESS.md, despite older root-level references in the preserved plan.
+- Follow the latest user-authorized phase and priority order in docs/TASKS.md and docs/PROGRESS.md; docs/SPRINT_1.md records the historical first sprint. The canonical progress file is docs/PROGRESS.md, despite older root-level references in the preserved plan.
 - Follow the Next.js/TypeScript/Tailwind, single-server SQLite/Drizzle architecture. Distinguish implemented behavior from plans in docs/ARCHITECTURE.md.
 - Discuss out-of-scope features and major architecture changes first. No standalone notes feature, runtime AI, paid services, or enterprise infrastructure.
 

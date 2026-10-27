@@ -15,6 +15,13 @@
       "when": 1792874773074,
       "tag": "0001_safe_exiles",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793042081716,
+      "tag": "0002_curvy_warlock",
+      "breakpoints": true
     }
   ]
 }
