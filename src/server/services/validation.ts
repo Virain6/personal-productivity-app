@@ -1,3 +1,5 @@
+import { studyScheduleCommand } from "./study-schedule-validation";
+import { learningCommand } from "./learning-validation";
 import { habitCommand } from "./habit-validation";
 import { z } from "zod";
 import { categories } from "../../lib/planner-types";
@@ -38,6 +40,18 @@ export const taskFields = z
       });
   });
 export const command = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("taskTopic"),
+    id: z.string(),
+    stepId: z.string().nullable(),
+    version: z.number().int().min(0),
+  }),
+  z.object({
+    action: z.literal("sessionTopic"),
+    id: z.string(),
+    stepId: z.string().nullable(),
+    version: z.number().int().min(0),
+  }),
   z.object({ action: z.literal("create"), fields: taskFields }),
   z.object({
     action: z.literal("edit"),
@@ -52,9 +66,14 @@ export const command = z.discriminatedUnion("action", [
     status: z.enum(["pending", "done", "skipped"]),
     stopRunning: z.boolean().default(false),
   }),
-  z.object({ action: z.literal("start"), id: z.string() }),
+  z.object({
+    action: z.literal("start"),
+    id: z.string(),
+    stepId: z.string().nullable().optional(),
+  }),
   z.object({
     action: z.literal("switch"),
+    stepId: z.string().nullable().optional(),
     sessionId: z.string(),
     id: z.string(),
   }),
@@ -81,6 +100,7 @@ export const command = z.discriminatedUnion("action", [
   }),
   z.object({
     action: z.literal("manual"),
+    stepId: z.string().nullable().optional(),
     id: z.string(),
     startedAt: z.number().int(),
     endedAt: z.number().int(),
@@ -93,6 +113,8 @@ export const mutation = z.object({
   command: z.discriminatedUnion("action", [
     ...command.options,
     ...habitCommand.options,
+    ...learningCommand.options,
+    ...studyScheduleCommand.options,
   ]),
 });
 export class DomainError extends Error {

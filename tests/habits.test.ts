@@ -24,7 +24,7 @@ import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import { openDatabase, type Store } from "../src/server/db/connection";
-import { seed } from "../src/server/services/scheduling";
+import { seed } from "./legacy-seed";
 import { mutate } from "../src/server/services/mutations";
 import { getDashboard } from "../src/server/services/dashboard";
 import { getHabits, getHabitCalendar } from "../src/server/services/habits";

@@ -1,3 +1,6 @@
+import { mutateStudySchedule } from "./study-schedules";
+import { linkNewSession, setTaskTopic, setSessionTopic } from "./study-links";
+import { mutateLearning } from "./learning";
 import { mutateHabit } from "./habits";
 import { eq } from "drizzle-orm";
 import type { Store } from "../db/connection";
@@ -32,7 +35,11 @@ export function mutate(store: Store, input: unknown, now = Date.now()) {
       const c = parsed.command;
       const timezone = store.db.select().from(settings).get()!.timezone;
       let id: string | undefined;
-      if (
+      if (c.action === "roadmapCreate" || c.action === "roadmapChange")
+        id = mutateLearning(store, c, now);
+      else if (c.action === "studyScheduleSave" || c.action === "studyTask")
+        id = mutateStudySchedule(store, c, now);
+      else if (
         c.action === "habitQuick" ||
         c.action === "habitCreate" ||
         c.action === "habitEdit" ||
@@ -47,6 +54,10 @@ export function mutate(store: Store, input: unknown, now = Date.now()) {
         id = saveTask(store, c.fields, now, timezone, c.id, c.version);
       else if (c.action === "status")
         setStatus(store, c.id, c.version, c.status, c.stopRunning, now);
+      else if (c.action === "taskTopic")
+        id = setTaskTopic(store, c.id, c.stepId, c.version);
+      else if (c.action === "sessionTopic")
+        id = setSessionTopic(store, c.id, c.stepId, c.version);
       else if (c.action === "start") id = startTimer(store, c.id, now);
       else if (c.action === "switch")
         id = switchTimer(store, c.sessionId, c.id, now);
@@ -78,6 +89,26 @@ export function mutate(store: Store, input: unknown, now = Date.now()) {
           c.endedAt,
           c.summary,
           c.overlapConfirmed,
+          now,
+        );
+      if (
+        id &&
+        (c.action === "start" || c.action === "switch" || c.action === "manual")
+      )
+        linkNewSession(store, id, c.stepId);
+      if (id && c.action === "studyTask" && c.startNow) {
+        const sessionId = startTimer(store, id, now);
+        linkNewSession(store, sessionId, c.stepId);
+      }
+      if (id && c.action === "roadmapCreate" && c.schedule)
+        mutateStudySchedule(
+          store,
+          {
+            action: "studyScheduleSave",
+            roadmapId: id,
+            sectionId: null,
+            config: c.schedule,
+          },
           now,
         );
       const result = { ok: true, id };

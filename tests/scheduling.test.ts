@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { eq } from "drizzle-orm";
 import { openDatabase } from "../src/server/db/connection";
-import { seed, ensureOccurrences } from "../src/server/services/scheduling";
+import { seed, ensureOccurrences } from "./legacy-seed";
 import { saveTask, setStatus } from "../src/server/services/tasks";
 import { tasks, templates } from "../src/server/db/schema";
 import { dayBounds, localDate, weekStart } from "../src/lib/dates";

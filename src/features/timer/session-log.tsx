@@ -1,10 +1,18 @@
 "use client";
-import { useState, type FormEvent } from "react";
+import { roadmapColor } from "@/lib/roadmap-colors";
+import { useRef, useState, type FormEvent } from "react";
 import { DateTime } from "luxon";
 import type { Session, Task } from "@/lib/planner-types";
 import { localOptions, formatDuration } from "@/lib/dates";
 import { Button } from "@/components/ui/button";
 import { sendCommand } from "@/lib/api";
+import { usePlannerQuery } from "@/lib/use-planner-query";
+import { type LearningData } from "@/lib/learning-types";
+import {
+  StepSelect,
+  TopicDescription,
+  SessionTopicEditor,
+} from "@/features/learning/study-controls";
 import { TaskTimer } from "./task-timer";
 export function SessionLog({
   task,
@@ -17,6 +25,45 @@ export function SessionLog({
   timezone: string;
   onSaved: () => void;
 }) {
+  const learning = usePlannerQuery<LearningData>("/api/planner?view=learning");
+  const [topicDraft, setTopicDraft] = useState<{
+    id: string;
+    version: number;
+    saved?: boolean;
+  } | null>(null);
+  const [topicEditing, setTopicEditing] = useState<Session | null>(null);
+  const [topicBusy, setTopicBusy] = useState(false),
+    [topicError, setTopicError] = useState("");
+  const topicGate = useRef(false);
+  const savedTopic = task.learning?.topic;
+  const stepId =
+    topicDraft?.id ?? (savedTopic?.available ? savedTopic.stepId : "");
+  const isLearning = Boolean(learning.data?.roadmaps.length || savedTopic);
+  async function saveTopic() {
+    if (topicGate.current || !topicDraft) return;
+    topicGate.current = true;
+    setTopicBusy(true);
+    setTopicError("");
+    try {
+      await sendCommand({
+        action: "taskTopic",
+        id: task.id,
+        stepId: topicDraft.id || null,
+        version: topicDraft.version,
+      });
+      onSaved();
+      setTopicDraft({
+        ...topicDraft,
+        version: topicDraft.version + 1,
+        saved: true,
+      });
+    } catch (e) {
+      setTopicError(e instanceof Error ? e.message : "Could not save topic.");
+    } finally {
+      topicGate.current = false;
+      setTopicBusy(false);
+    }
+  }
   const [editing, setEditing] = useState<Session | null>(null);
   const [start, setStart] = useState("");
   const [offset, setOffset] = useState("");
@@ -45,6 +92,7 @@ export function SessionLog({
       const duration = Number(f.get("minutes"));
       await sendCommand({
         action: "manual",
+        stepId: stepId || null,
         id: task.id,
         startedAt: selected.value,
         endedAt: selected.value + duration * 60000,
@@ -65,8 +113,88 @@ export function SessionLog({
     <section aria-label="Time sessions">
       <div className="flex items-center justify-between">
         <h3 className="font-medium">Time sessions</h3>
-        <TaskTimer task={task} />
+        <TaskTimer task={task} stepId={stepId || null} />
       </div>
+      {isLearning && (
+        <div className="my-3 space-y-2">
+          {learning.data ? (
+            <>
+              <StepSelect
+                data={learning.data}
+                category={task.category}
+                value={stepId}
+                onChange={(id) =>
+                  setTopicDraft({
+                    id,
+                    version: topicDraft?.version ?? task.learning?.version ?? 0,
+                  })
+                }
+                label="Topic for new sessions (optional)"
+                disabled={topicBusy || busy}
+              />
+              <TopicDescription data={learning.data} stepId={stepId} />
+              {savedTopic && !savedTopic.available && (
+                <p className="text-xs text-muted">
+                  Previous activity topic: {savedTopic.roadmapTitle} /{" "}
+                  {savedTopic.stepTitle} (archived or removed). New sessions are
+                  unlinked until you choose an active topic.
+                </p>
+              )}
+              <p className="text-xs text-muted">
+                Used by the timer above and manual logs below. Save as activity
+                topic to also use it from the calendar. Applies only to this
+                occurrence.
+              </p>
+              <Button
+                disabled={topicBusy || !topicDraft || topicDraft.saved}
+                onClick={() => void saveTopic()}
+              >
+                Save activity topic
+              </Button>
+              {topicDraft?.saved && (
+                <p role="status" className="text-xs text-success">
+                  Activity topic saved.
+                </p>
+              )}
+              {topicDraft && (
+                <Button
+                  variant="ghost"
+                  disabled={topicBusy}
+                  onClick={() => {
+                    setTopicDraft(null);
+                    setTopicError("");
+                  }}
+                >
+                  Reload saved topic
+                </Button>
+              )}
+            </>
+          ) : (
+            <p className="text-xs text-muted">Loading learning topics…</p>
+          )}
+          {learning.error && (
+            <p role="alert" className="text-danger">
+              {learning.error}
+              <Button onClick={learning.reload}>Retry topics</Button>
+            </p>
+          )}
+          {topicError && (
+            <p role="alert" className="text-danger">
+              {topicError}
+            </p>
+          )}
+        </div>
+      )}
+      {topicEditing && learning.data && (
+        <SessionTopicEditor
+          key={topicEditing.id}
+          session={topicEditing}
+          data={learning.data}
+          category={task.category}
+          onClose={() => setTopicEditing(null)}
+          onSaved={onSaved}
+        />
+      )}
       <ul className="mb-4 space-y-2">
         {sessions.length ? (
           sessions.map((s) => (
@@ -84,6 +212,28 @@ export function SessionLog({
                   · {s.source}
                 </span>
               </div>
+              {s.learning?.stepId && (
+                <p className="mt-2 break-words text-muted">
+                  <span
+                    style={{ color: roadmapColor(s.learning.color) }}
+                    aria-hidden="true"
+                  >
+                    ●{" "}
+                  </span>
+                  {s.learning.roadmapTitle} / {s.learning.sectionTitle} /{" "}
+                  {s.learning.stepTitle}
+                </p>
+              )}
+              {(isLearning || s.learning?.stepId) && (
+                <Button
+                  variant="ghost"
+                  disabled={busy || topicEditing !== null || !learning.data}
+                  onClick={() => setTopicEditing(s)}
+                  aria-label={`Edit learning topic for session ${DateTime.fromMillis(s.startedAt, { zone: timezone }).toFormat("MMM d, HH:mm")}`}
+                >
+                  Edit learning topic
+                </Button>
+              )}
               {s.overlapConfirmed && (
                 <p className="mt-2 text-warning">Intentional overlap</p>
               )}

@@ -1,3 +1,4 @@
+import { scheduleContext, applyStudyOccurrence } from "./study-schedules";
 import { eq } from "drizzle-orm";
 import { DateTime } from "luxon";
 import type { Store } from "../db/connection";
@@ -50,40 +51,11 @@ export function seed(store: Store, now = Date.now()) {
         });
       }
       for (let day = 1; day <= 5; day++) {
-        add(day, "dsa", "DSA practice", "DSA", 90);
         add(day, "project", "Project work", "Project", 120);
       }
-      add(1, "focus", "Computer Science Fundamentals", "Fundamentals", 90);
-      add(2, "focus", "Databases & SQL", "Databases", 90);
-      add(3, "focus", "Mock Interview", "Interviews", 90);
-      add(
-        4,
-        "focus",
-        "System Design & Architecture + Backend Engineering",
-        "System/Backend",
-        90,
-      );
-      add(5, "focus", "Testing, Debugging & DevOps", "Testing/DevOps", 90);
-      add(
-        3,
-        "specialization",
-        "Learn on the specialization topic",
-        "Specialization",
-        60,
-      );
-      add(
-        5,
-        "specialization",
-        "Review and practice activity",
-        "Specialization",
-        60,
-      );
       for (const day of [2, 4])
         add(day, "jobs", "Job applications", "Applications", 90);
-      add(6, "dsa", "DSA review", "DSA", 60);
-      add(6, "focus", "Review weak areas", "Fundamentals", 60);
       add(6, "project", "Project work", "Project", 120);
-      add(7, "dsa", "Optional DSA", "DSA", 60, true);
       add(7, "project", "Optional project work", "Project", 120, true);
       for (const row of rows)
         store.db.insert(templates).values(row).onConflictDoNothing().run();
@@ -115,6 +87,8 @@ export function ensureOccurrences(
             (template.effectiveUntil && date > template.effectiveUntil)
           )
             continue;
+          const context = scheduleContext(store, template.id, date);
+          if (context && !context.enabled) continue;
           store.db
             .insert(tasks)
             .values({
@@ -122,10 +96,12 @@ export function ensureOccurrences(
               templateId: template.id,
               occurrenceDate: date,
               plannedDate: date,
-              title: template.title,
+              title: context?.title ?? template.title,
               category: template.category,
-              suggestedTime: template.suggestedTime,
-              targetMinutes: template.targetMinutes,
+              suggestedTime: context
+                ? context.config.time
+                : template.suggestedTime,
+              targetMinutes: context?.config.minutes ?? template.targetMinutes,
               optional: template.optional,
               createdAt: now,
               updatedAt: now,
@@ -134,6 +110,20 @@ export function ensureOccurrences(
               target: [tasks.templateId, tasks.occurrenceDate],
             })
             .run();
+          if (context) {
+            const row = store.sqlite
+              .prepare(
+                "SELECT id FROM tasks WHERE template_id=? AND occurrence_date=?",
+              )
+              .get(template.id, date) as { id: string };
+            applyStudyOccurrence(
+              store,
+              row.id,
+              context,
+              now,
+              localDate(now, config.timezone),
+            );
+          }
         }
       }
     })

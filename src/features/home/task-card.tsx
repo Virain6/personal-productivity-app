@@ -1,3 +1,4 @@
+import { roadmapColor } from "@/lib/roadmap-colors";
 import { ArrowUpRight } from "lucide-react";
 import { DateTime } from "luxon";
 import type { Task } from "@/lib/planner-types";
@@ -46,11 +47,24 @@ export function TaskCard({
         ? `Suggested ${task.suggestedTime}`
         : "Anytime";
   return (
-    <article className={calendarCardClass(state)} data-state={state}>
+    <article
+      className={calendarCardClass(state)}
+      data-state={state}
+      style={
+        task.studyRoadmap
+          ? { borderLeft: `2px solid ${roadmapColor(task.studyRoadmap.color)}` }
+          : undefined
+      }
+    >
       <p
+        style={
+          task.studyRoadmap
+            ? { color: roadmapColor(task.studyRoadmap.color) }
+            : undefined
+        }
         className={`truncate text-[10px] font-medium uppercase tracking-wider ${color}`}
       >
-        {task.category}
+        {task.studyRoadmap ? "Study" : task.category}
       </p>
       <div className="flex items-center gap-1">
         <button
@@ -62,6 +76,14 @@ export function TaskCard({
           >
             {task.title}
           </span>
+          {task.learning?.topic?.available && (
+            <span
+              className="block truncate text-[11px] font-normal text-muted"
+              title={task.learning.topic.stepTitle}
+            >
+              {task.learning.topic.stepTitle}
+            </span>
+          )}
         </button>
         <button
           disabled={busy || task.status === "skipped"}

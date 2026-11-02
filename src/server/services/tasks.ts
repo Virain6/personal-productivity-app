@@ -1,11 +1,36 @@
 import { eq, and, isNull } from "drizzle-orm";
 import { DateTime } from "luxon";
 import type { Store } from "../db/connection";
-import { tasks, completions, sessions } from "../db/schema";
+import {
+  tasks,
+  completions,
+  sessions,
+  taskStudy,
+  retiredStudyTasks,
+} from "../db/schema";
 import { DomainError, taskFields } from "./validation";
 import type { z } from "zod";
 export function requireTask(store: Store, id: string, version?: number) {
   const task = store.db.select().from(tasks).where(eq(tasks.id, id)).get();
+  if (
+    store.db
+      .select()
+      .from(retiredStudyTasks)
+      .where(eq(retiredStudyTasks.taskId, id))
+      .get()
+  )
+    throw new DomainError(
+      "This obsolete study occurrence was retired. Reload Home.",
+      409,
+    );
+  if (
+    store.db.select().from(taskStudy).where(eq(taskStudy.taskId, id)).get()
+      ?.cancelled
+  )
+    throw new DomainError(
+      "This schedule occurrence was cancelled. Reload Home.",
+      409,
+    );
   if (!task) throw new DomainError("Task not found.", 404);
   if (version !== undefined && task.version !== version)
     throw new DomainError(

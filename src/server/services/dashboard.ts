@@ -1,6 +1,15 @@
+import { taskTopic } from "./study-links";
 import { and, eq, gte, lte, isNull } from "drizzle-orm";
 import type { Store } from "../db/connection";
-import { tasks, sessions, settings } from "../db/schema";
+import {
+  tasks,
+  sessions,
+  settings,
+  sessionLearning,
+  taskStudy,
+  roadmaps,
+  retiredStudyTasks,
+} from "../db/schema";
 import { ensureOccurrences } from "./scheduling";
 import { addDays, dayBounds, localDate } from "../../lib/dates";
 import type { HomeData } from "../../lib/planner-types";
@@ -19,8 +28,38 @@ export function getDashboard(
       .select()
       .from(tasks)
       .where(and(gte(tasks.plannedDate, from), lte(tasks.plannedDate, to)))
-      .all();
-    const allSessions = store.db.select().from(sessions).all();
+      .all()
+      .filter(
+        (t) =>
+          !store.db
+            .select()
+            .from(retiredStudyTasks)
+            .where(eq(retiredStudyTasks.taskId, t.id))
+            .get() &&
+          !store.db
+            .select()
+            .from(taskStudy)
+            .where(eq(taskStudy.taskId, t.id))
+            .get()?.cancelled,
+      );
+    const maps = store.db.select().from(roadmaps).all();
+    const links = store.db.select().from(sessionLearning).all();
+    const allSessions = store.db
+      .select()
+      .from(sessions)
+      .all()
+      .map((s) => ({
+        ...s,
+        learning: (() => {
+          const link = links.find((l) => l.sessionId === s.id);
+          return link
+            ? {
+                ...link,
+                color: maps.find((m) => m.id === link.roadmapId)?.color,
+              }
+            : null;
+        })(),
+      }));
     const runningSession = allSessions.find((x) => x.endedAt === null);
     const runningTask = runningSession
       ? store.db
@@ -29,8 +68,15 @@ export function getDashboard(
           .where(eq(tasks.id, runningSession.taskId))
           .get()
       : null;
+    const scopes = store.db.select().from(taskStudy).all();
     const entries = rows.map((task) => ({
+      studyRoadmap: (() => {
+        const scope = scopes.find((s) => s.taskId === task.id);
+        const map = maps.find((m) => m.id === scope?.roadmapId);
+        return map ? { id: map.id, title: map.title, color: map.color } : null;
+      })(),
       ...task,
+      learning: taskTopic(store, task.id),
       actualMs: allSessions
         .filter((s) => s.taskId === task.id && s.endedAt !== null)
         .reduce((n, s) => n + s.endedAt! - s.startedAt, 0),

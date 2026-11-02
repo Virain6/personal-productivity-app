@@ -235,3 +235,66 @@ Required before calling production verified: exact Ubuntu version and disk space
 - [Tailscale Serve CLI](https://tailscale.com/docs/reference/tailscale-cli/serve): private HTTPS listener, status inspection and per-listener removal.
 - [Tailscale grants](https://tailscale.com/docs/features/access-control/grants): review additive access policy, not just tailnet membership.
 - [Apple Mac web apps](https://support.apple.com/en-ie/104996) and [iPhone Add to Home Screen](https://support.apple.com/en-mide/guide/iphone/iph42ab2f3a7/27/ios/27).
+
+## Sprint 6 roadmap migration (0003)
+
+The user reports the server and Mac/iPhone PWAs are live. Sprint 6 development does not authorize a deployment. Migration `0003_stiff_leopardon.sql` adds only `roadmaps`, `roadmap_sections`, `learning_steps` and their indexes; it seeds no roadmap or replacement data. The upgrade has been tested against a populated isolated previous schema, including a running timer. Session/Home associations are added by migration 0004 below.
+
+For a separately authorized release, follow the update sequence above: retain the running image ID/tag, build the reviewed new image, stop only Planner, take and verify a fresh SQLite backup, run the migration tool, then start and check health and existing Home/Habits plus Learning writes. Startup also backs up before pending migrations and fails closed on backup failure. Do not run development seeds on production. No manual SQL or database reset is needed. Preserve the backup, metadata and old image. For rollback use the documented matching image/snapshot restored to a new directory; there is no down-migration. Rehearse this release with a restored copy before using the live database.
+
+## Sprint 6 integration migration (0004)
+
+`0004_funny_garia.sql` adds only `task_learning`, `session_learning` and a step index, with foreign keys to existing tasks/sessions/roadmap records. Existing data remains untouched and initially unlinked. An upgrade from Sprint 5 applies 0003 then 0004 in journal order; a database already on 0003 receives only 0004. Keep both SQL files, snapshots and the complete migration journal in the release. Do not regenerate, edit or delete old migration history. Both upgrade paths were tested with populated isolated records; no production database was accessed.
+
+Before an authorized release, review/commit the complete Sprint 6 work, retain the deployed image tag and verify a restorable backup. Follow section 8 exactly: build the reviewed image, stop only Planner, create a fresh backup using deploy-db.mjs, run its migrate command and start with Compose. The migration tool verifies its automatic pre-migration snapshot and fails closed. Never seed/reset production. Rehearse against a restored copy first. No separate frontend/backend service or additional environment variable is required.
+
+Acceptance: verify health, old Home/Habits data, a persisted running timer, roadmap creation, optional activity topic, timer/manual session attribution, correction/unlink with unchanged duration, Home topic after refresh, and Learning totals/mastery separation. Check both Mac and iPhone PWAs after refreshing to the new client. For rollback retain the new database and restore the verified pre-update snapshot to a new directory with its matching old image, following section 8; no down-migration is provided. Writes made after the snapshot require deliberate reconciliation. Target image/device validation was not performed during local integration development.
+
+## Sprint 6.5 workspace migration (0005; not deployed)
+
+`0005_daily_donald_blake.sql` adds optional metadata and explicit step status, then backfills Completed for existing completed steps. Include its generated snapshot and updated journal together with all previous migrations. Upgrade tests cover populated databases through 0002, 0003 and 0004; original columns, active timer data and integrity remain intact. Runtime dependencies and environment variables are unchanged.
+
+Do not deploy this sprint automatically. The later module milestone implements template/scheduling integration; Markdown import remains unfinished. When a release is separately approved, follow the existing stop/verified-backup/restored-copy-rehearsal/migrate/start procedure. All pending migrations apply in journal order; never run seeds or edit old migration files. Stop the old app during upgrade and refresh clients before writes: the old version only understands the completion boolean, while the new service synchronizes that boolean and status. Roll back only with the matching old image and pre-upgrade snapshot in a new directory; preserve the newer database for reconciliation.
+
+Rehearsal checks: legacy completed/uncompleted statuses, custom-category roadmap edit/archive/restore, objective/date persistence, existing session labels and durations, timer start/switch/pause, Home/Habits logging, and Mac/iPhone Learning sheet behavior. Target Docker and physical-device checks remain outstanding. No production database was accessed during development.
+
+## Sprint 6.5 module migration (0006; not deployed)
+
+Include 0006_funny_outlaw_kid.sql, its snapshot and the complete journal with prior migrations. It adds four schedule/occurrence association tables, module archive state, and nullable session_learning.section_id; existing step-linked sessions are backfilled with their module ID. No task/time rows are replaced. Populated isolated upgrades through 0002, 0003, 0004 and 0005 pass original-column preservation, integrity and foreign-key checks.
+
+For a separately authorized release: retain the deployed image, build/review the new target image, rehearse migrations and smoke checks on a verified restored copy, then stop Planner, take a fresh verified backup, run the existing deployment migration tool and restart. Apply all pending journal migrations in order. Do not seed/reset data or run old and new app versions concurrently. Refresh Mac/iPhone clients before writes. Rollback requires a matching old image and pre-update snapshot restored to a new location; retain newer data for reconciliation.
+
+Smoke-test existing Home/Habits and running timers, existing session labels/time, new module attribution, linking one existing weekday activity, schedule edit/pause/resume without duplicate occurrences, dynamic Home topics, extra-session date/time, archived history and monthly counts. No new environment variables or services are needed. This milestone is ready for local release review; target Docker/restored-production-copy and physical-device validation are not claimed. Full Sprint 6.5 still has Markdown import outstanding. No production access or deployment occurred.
+
+## Sprint 6.6 migration and optional legacy preset retirement
+
+0007_strong_tana_nile.sql adds only roadmaps.color with default purple. Include its snapshot and journal; retain all previous migrations. No category columns are dropped and no tasks/templates/sessions are removed. Use the existing stop/verified-backup/restored-copy rehearsal/migrate/start procedure, then refresh clients. No new service or environment variable is needed. Target image and physical-device verification remain outstanding.
+
+Fresh initialization no longer inserts learning presets, but existing default-* templates intentionally remain active until explicitly retired. Do not assume a default-looking ID or title means unused data. Safe opt-in cleanup procedure (not executed):
+
+1. On an isolated restored backup, inventory exact candidate template IDs, all generated tasks, task edits/status, time sessions and any study_template_links. Include only learning presets, never Project/Applications or arbitrary custom templates.
+2. Review the chosen IDs with the user. If a template belongs to a roadmap schedule, use its reversible Pause/Remove controls instead of changing the underlying template independently.
+3. For approved unlinked presets, close the template's effective_until at the chosen cutoff in a reviewed transaction. Retain template/task/session rows. Do not delete time, completion events, moved tasks or edited occurrences.
+4. Review already generated future occurrences separately; explicitly skip unwanted pending tasks through existing task controls. Do not bulk-delete them or rewrite historical records. Keep legitimate edited/logged occurrences.
+5. Verify repeated generation creates no new post-cutoff occurrences and all historical totals/IDs remain intact. Only then consider a separately authorized live cleanup after another verified backup. Production seed does not re-open retired templates.
+
+This strategy is documented, not an automatic cleanup migration or new archive UI. New roadmap schedules may coexist with retained legacy routines until the user deliberately retires those routines.
+
+## Roadmap-only correction: migration 0008 and explicit retirement
+
+This supersedes the earlier proposed manual preset-retirement strategy. 0008_condemned_guardsmen.sql adds retired_study_tasks only. Ship its snapshot/journal with all prior migrations. Migration alone does not retire presets. New code blocks module recurrence; retirement separately hides eligible pre-generated occurrences and closes legacy seed templates. Existing roadmap colors and all saved time/mastery/history remain unchanged.
+
+Rehearse on a restored backup first. Stop Planner before the production upgrade, preserve the old image, take a verified backup, apply pending migrations with deploy-db.mjs, then preview cleanup. scripts/retire-learning.ts requires explicit DATABASE_PATH; without --apply it opens read-only and prints candidate template/schedule/task IDs plus preserved exceptions. --apply makes another verified SQLite backup before opening/migrating the database and applying the retirement transaction. Review exceptions rather than deleting them. Four meaningful past local occurrences were retained intentionally.
+
+From a reviewed source checkout with Node 22 and npm ci dependencies (not the minimal standalone runtime):
+
+```sh
+DATABASE_PATH=/absolute/path/to/restored/planner.db node --import tsx scripts/retire-learning.ts
+DATABASE_PATH=/absolute/path/to/restored/planner.db node --import tsx scripts/retire-learning.ts --apply
+```
+
+The database must have the Learning schema before preview; use the existing backup-aware migration tool first for older deployments. The source tool is not bundled in the minimal runtime image. For the Ubuntu Docker workflow, build a separate maintenance image from the existing build stage after review (`docker build --target build -t planner-maintenance .`). With Planner stopped, mount the reviewed database at /app/data and backups at /app/backups, run as UID/GID 10001 with no network, and execute the same node --import tsx command against /app/data/planner.db. Use the maintenance image's deploy-db.mjs migrate first if needed. Never run the cleanup against an assumed path or an active production instance.
+
+Afterward verify integrity/FKs, saved session and completion counts, no legacy future learning activities, roadmap recurrence, roadmap-only timer logs, one-off reuse/explicit extras, module history, Home and Habits. Refresh clients. Keep the verified backup and matching previous image; rollback requires restoring that pair to a new location, not deleting retirement markers blindly. Target Docker and actual device rehearsal remain unperformed here.
+
+Local application completed 2026-10-31 only: 15 templates closed, 74 unworked occurrences marked, zero module schedules, four past edited/logged occurrences preserved. Verified backup: backups/backup-2026-10-31T04-05-00-249Z-e3Qyyp/planner.db. No production access or deployment occurred.

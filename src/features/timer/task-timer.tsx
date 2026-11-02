@@ -2,7 +2,13 @@
 import { Play, Pause } from "lucide-react";
 import type { Task } from "@/lib/planner-types";
 import { useTimer } from "./timer-provider";
-export function TaskTimer({ task }: { task: Task }) {
+export function TaskTimer({
+  task,
+  stepId,
+}: {
+  task: Task;
+  stepId?: string | null;
+}) {
   const timer = useTimer();
   const active = timer.running?.taskId === task.id;
   return (
@@ -13,7 +19,9 @@ export function TaskTimer({ task }: { task: Task }) {
       }
       aria-label={`${active ? "Pause" : "Start timer for"} ${task.title}`}
       onClick={() =>
-        void (active ? timer.pause() : timer.start(task.id)).catch(() => {})
+        void (active ? timer.pause() : timer.start(task.id, stepId)).catch(
+          () => {},
+        )
       }
     >
       {active ? <Pause size={16} /> : <Play size={16} />}

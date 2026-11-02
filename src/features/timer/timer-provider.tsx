@@ -18,7 +18,7 @@ type Clock = {
   now: number;
   error: string;
   busy: boolean;
-  start: (id: string) => Promise<void>;
+  start: (id: string, stepId?: string | null) => Promise<void>;
   pause: () => Promise<void>;
   finish: () => void;
 };
@@ -41,6 +41,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   const [switchTarget, setSwitchTarget] = useState<{
     sessionId: string;
     id: string;
+    stepId?: string | null;
   } | null>(null);
   const [busy, setBusy] = useState(false);
   const [finishOpen, setFinishOpen] = useState(false);
@@ -105,13 +106,13 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     }
   }
   const running = snapshot?.running ?? null;
-  async function start(id: string) {
+  async function start(id: string, stepId?: string | null) {
     if (running && running.taskId !== id) {
       setError("");
-      setSwitchTarget({ sessionId: running.id, id });
+      setSwitchTarget({ sessionId: running.id, id, stepId });
       return;
     }
-    await action({ action: "start", id });
+    await action({ action: "start", id, stepId });
   }
   async function pause() {
     if (running) await action({ action: "stop", sessionId: running.id });

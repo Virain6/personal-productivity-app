@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { DateTime } from "luxon";
 import { categories, type Task } from "@/lib/planner-types";
@@ -47,7 +48,9 @@ export function TaskDialog({
         );
       const fields = {
         title: String(f.get("title")),
-        category: String(f.get("category")),
+        category: task?.studyRoadmap
+          ? task.category
+          : String(f.get("category")),
         plannedDate: String(f.get("date")),
         mode,
         suggestedTime:
@@ -116,14 +119,26 @@ export function TaskDialog({
           />
         </label>
         <div className="grid grid-cols-2 gap-3">
-          <label>
-            Category
-            <select name="category" defaultValue={task?.category ?? "Other"}>
-              {categories.map((c) => (
-                <option key={c}>{c}</option>
-              ))}
-            </select>
-          </label>
+          {task?.studyRoadmap ? (
+            <div className="text-sm">
+              <span className="block text-muted">Roadmap</span>
+              <Link
+                className="inline-flex min-h-11 items-center text-accent-hover"
+                href={`/learning/${task.studyRoadmap.id}`}
+              >
+                {task.studyRoadmap.title}
+              </Link>
+            </div>
+          ) : (
+            <label>
+              Category
+              <select name="category" defaultValue={task?.category ?? "Other"}>
+                {categories.map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
+              </select>
+            </label>
+          )}
           <label>
             Date
             <input

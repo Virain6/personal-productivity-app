@@ -1,3 +1,5 @@
+import { getModuleActivity } from "@/server/services/module-activity";
+import { getLearning } from "@/server/services/learning";
 import { getHabits, getHabitCalendar } from "@/server/services/habits";
 import { guardRequest } from "@/server/services/http";
 import { ZodError } from "zod";
@@ -38,6 +40,20 @@ export async function GET(request: Request) {
     guardRequest(request);
     const url = new URL(request.url);
     const store = getStore();
+    if (url.searchParams.get("view") === "module")
+      return Response.json(
+        getModuleActivity(
+          store,
+          url.searchParams.get("roadmap") ?? "",
+          url.searchParams.get("module") || null,
+          url.searchParams.get("month") ?? "",
+        ),
+        { headers: { "Cache-Control": "no-store" } },
+      );
+    if (url.searchParams.get("view") === "learning")
+      return Response.json(getLearning(store), {
+        headers: { "Cache-Control": "no-store" },
+      });
     if (url.searchParams.get("view") === "habitCalendar")
       return Response.json(
         getHabitCalendar(

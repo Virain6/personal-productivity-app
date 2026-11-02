@@ -7,7 +7,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { eq } from "drizzle-orm";
 import { openDatabase } from "../src/server/db/connection";
-import { seed } from "../src/server/services/scheduling";
+import { seed } from "./legacy-seed";
 import { mutate } from "../src/server/services/mutations";
 import { tasks, sessions } from "../src/server/db/schema";
 import { getDashboard, getRunning } from "../src/server/services/dashboard";

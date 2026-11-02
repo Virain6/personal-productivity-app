@@ -67,3 +67,33 @@ Keep measurement and goal direction separate. Extend validated configuration JSO
 The clarified resume request supersedes the interrupted separate Home Habits section. Derive date-specific habit cards and render them through the existing agenda, with a small dedicated card rather than adding habit branches to task-specific timer controls. Do not create task copies. Reuse the existing services, command transport and Radix dialog; keep a captured versioned draft until saved or explicitly discarded.
 
 Flexible weekly habits are available on any day and labeled flexible. An explicit workout date overrides unrecorded future schedule placement. Archived and unscheduled recorded history stays visible, while new archived/unscheduled instances do not appear. Future rotation labels show the current pending step only; no date-based advance. Monthly analytics and deployment stay outside this sprint.
+
+## 2026-10-28 — Learning roadmap management milestone
+
+Use the requested Roadmap → Sections → Learning Steps hierarchy. Manual step completion is mastery; time and current-topic selection remain separate. Reuse existing task-category identifiers with user-facing learning labels. Category time sums existing closed sessions, clearly labeled; per-roadmap/session attribution waits for explicit associations. Soft deletion and archive preserve records. Version checks and existing command receipts protect stale edits and retries. Finish this independently tested management milestone before adding optional session links and Home controls; long-term requirements remain unchanged.
+
+## 2026-10-29 — explicit study attribution
+
+Use two additive association tables instead of altering existing task/time rows. Activity topic is an optional per-occurrence default; session topic is the actual attribution and can differ. Snapshot labels when a link is created or deliberately changed; roadmap renames never rewrite historical labels. Keep null-link version rows for concurrency protection. Inactive defaults do not break time logging. Attach links within existing transactions, including timer switches. No automatic category-wide roadmap choice, inferred mastery, template editor or duplicate time ledger.
+
+## 2026-10-30 — module schedule identities and reporting
+
+Keep one optional weekly schedule per roadmap or module. Reuse stable weekday activity-template IDs plus immutable effective-date configuration revisions, rather than replacing templates on each edit. Existing template/date uniqueness and retained cancelled occurrence rows prevent regeneration duplicates. Version-based exception detection preserves manually edited/moved, started/logged, completed/skipped and explicitly linked tasks. This refines the original plan's replacement-template proposal without changing its history-preservation requirement.
+
+Linking an existing template adopts one weekday activity; other selected days create new templates. The form discloses this rather than silently merging potentially unrelated existing activities. Schedule removal is reversible configuration, not physical deletion. Archive pauses schedules; restore does not unexpectedly resume them.
+
+Add stable section attribution to session links, backfilled from existing steps, so module history survives renames/reordering/archive and module-only time remains possible when no next step exists. Keep original session duration authoritative. Monthly consistency measures completed elapsed scheduled days, independently of recorded study and mastery; today/future/rest days are excluded. Counts use local start date, while actual time splits at local midnight/DST.
+
+Complete and verify the module/scheduling milestone before beginning Markdown import, as permitted by the resume request and repository milestone workflow. Preserve all original long-term requirements and staged work; no automatic deployment.
+
+## 2026-10-30 — Sprint 6.6 removes user-facing learning categories
+
+Roadmap → Modules → Steps is the sole Learning hierarchy. Retain legacy category columns and optional command fields to avoid destructive migration, but remove category controls and presets from new learning workflows. Roadmap color is a validated palette key with a purple migration default. Fresh seed stops inserting learning templates; existing installations are never cleaned automatically.
+
+Keep roadmap/module schedules explicitly additive, with one stable series per scope. Do not silently merge sessions on matching weekdays: their durations/topics may differ. Both schedule panels disclose the consequence. Existing deduplication protects occurrence identities; renamed roadmaps update only untouched managed tasks, preserving historical titles and saved session snapshots. Legacy preset retirement requires separately reviewed IDs and a verified backup.
+
+## 2026-10-31 — correction: modules never own recurrence
+
+The user's explicit correction supersedes the October 30 additive module-schedule decision. Only roadmaps recur; modules/steps organize content and attribute study. Preserve legacy module schedule rows for history, block their generation, and retire eligible future instances explicitly. Study Anytime uses the same task/timer transaction, reusing an open date activity unless the user requests an additional one.
+
+Use additive retirement markers rather than deleting old unworked tasks. Close exact identified seed templates to prevent regeneration; preserve meaningful history and edits. Cleanup is an explicit backup-first tool, never a startup migration. The user authorized applying it to the local development database only. Production requires a separately reviewed run and remains untouched.

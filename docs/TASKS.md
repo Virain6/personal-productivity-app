@@ -1,6 +1,37 @@
 # Development tasks
 
-Current phase: **Sprint 5 deployment preparation complete; container/server/device acceptance checks remain.**
+Current phase: **Sprint 6.6 correction — roadmap-only recurrence and Study Anytime complete locally.**
+
+User reports successful Ubuntu deployment and Mac/iPhone PWA installation (2026-10-28). Prior operational checklist items below remain historical agent verification limits, not a claim that deployment has not occurred.
+
+## Sprint 6.6 correction — roadmap-only calendar sources (2026-10-31)
+
+This supersedes the earlier additive module-schedule decision below.
+
+- [x] Only roadmap schedules recur; reject module recurrence and remove its UI controls.
+- [x] Optional weekly days/duration/time during roadmap creation, atomically saved with the roadmap.
+- [x] Study Anytime supports immediate timer start and one-off date, optional step/duration, open-activity reuse and explicit additional sessions.
+- [x] Keep roadmap attribution when logging without a step; preserve timer transactions and mastery independence.
+- [x] Add non-destructive retirement markers and explicit preview/backup/apply tool.
+- [x] Locally retire 15 legacy templates and 74 untouched occurrences; preserve four historical/edited occurrences, saved sessions, completed tasks, habits and roadmaps.
+- [x] Verify zero default learning activities in the next 29 local Home days after generation.
+- [x] 79 tests, lint, typecheck, formatting, build and desktop/mobile browser checks.
+- [ ] Separately authorized production rehearsal, reviewed cleanup and device checks; no production changes in this task.
+
+## Sprint 6.6 — roadmap-first Learning
+
+- [x] Preserve staged/uncommitted Learning, Home, Habits and timer work.
+- [x] Remove Learning category inputs, labels and filters; permit category-free creation and editing.
+- [x] Persist curated roadmap colors with additive migration 0007 and purple legacy default.
+- [x] Apply accents to roadmap cards, progress/path markers, Home activities and session indicators.
+- [x] Stop seeding learning activities; retain existing records and unrelated Project/Applications initialization.
+- [x] Configure schedules directly without selecting templates; preserve optional module schedules with explicit additive-session wording.
+- [x] Use roadmap names for new/untouched managed occurrences; preserve completed/edited/logged snapshots.
+- [x] Verify 73 tests, lint, typecheck, formatting and production build; isolated desktop/mobile browser flow.
+- [x] Document opt-in legacy preset retirement and migration requirements.
+- [ ] Separate release review: target image, restored-backup rehearsal and real Mac/iPhone checks. No automatic deployment.
+
+Markdown import and structured DSA problems are explicitly outside Sprint 6.6. Earlier milestone sections remain historical records.
 
 ## Active priority order
 
@@ -11,6 +42,57 @@ Current phase: **Sprint 5 deployment preparation complete; container/server/devi
 5. Job Application Tracker and integrations.
 
 This order supersedes the original milestone ordering and release gate, not the long-term requirements. Milestone IDs below remain stable references. The daily-use MVP gate is Home + Habits + deployment; Learning/Projects no longer block deployment. Home calendar logging and the separate Habits management/history page are functional. Monthly statistics remain future work.
+
+## Sprint 6.5 — flexible roadmap workspace and visual redesign
+
+The user authorized completing a tested milestone if the combined sprint is too large. This milestone covers priorities 1–2 and reuses existing session linking for the step panel. Do not describe the whole sprint as complete or deploy automatically.
+
+- [x] Inspect and preserve staged Sprint 6 implementation and all existing Home/Habits/timer behavior.
+- [x] Custom roadmap names/categories (including DSA), multiple roadmaps per category, descriptions, goals, optional target dates, edit/archive/restore.
+- [x] Module/step descriptions and objectives, validated resource URLs, CRUD/reordering, four explicit statuses, current topic and next incomplete recommendation.
+- [x] Real overview summaries, responsive category cards, search/filter and empty states.
+- [x] Connected collapsible learning path with current/completed module indicators and accessible step actions.
+- [x] Desktop side panel/mobile full-screen sheet: details, status, resources, saved study time/history, editing/reordering, start studying through an existing activity and timer.
+- [x] Additive migration 0005 preserves previous columns and maps completed steps to Completed.
+- [x] 61 tests; lint, typecheck, formatting, production build; desktop/390px browser interaction checks against isolated synthetic data.
+- [x] Update architecture, design, progress and deployment considerations.
+- [x] Recurring activity template → roadmap/module links, generation/inheritance and current/next topic projection; preserve occurrence identity, explicit overrides and session snapshots.
+- [x] Schedule an additional study activity from a roadmap/module step through the existing task service.
+- [ ] Markdown import preview, explicit save and duplicate handling; no progress overwrite or automatic completion.
+- [ ] Optional DSA problem associations beyond the existing resource URL and session summary.
+- [ ] Physical iPhone keyboard/VoiceOver and Mac/iPhone PWA verification; target-container/restored-copy migration rehearsal before a separately authorized deployment.
+
+Resource support currently remains one HTTP/S URL per module/step. Category names are reusable text labels, not a separate category-admin system. Occurrence/session links can reference any active roadmap. Template linking and extra-task scheduling are implemented in the module milestone below. Progress remains explicit and independent of study hours. No Markdown importer is exposed yet.
+
+## Sprint 6.5 — module pages and study schedules (2026-10-30)
+
+- [x] Dedicated module route, editable steps/resources, current/next topic, mastery progress, saved time/session count, last studied and historical records.
+- [x] Separate roadmap-wide and module-specific weekly schedules: weekdays, optional suggested time, duration, existing-template link or new schedule, edit/pause/remove/restore.
+- [x] Reuse recurrence engine with stable template/date identities; preserve past, moved, edited, started, logged and explicitly linked exceptions.
+- [x] Monthly calendar with actual study markers, completed/missed/future/rest states, selected-day records and eligible-day consistency.
+- [x] Module archive/restore, retained session/module attribution and additive migration 0006.
+- [x] 69 tests, lint, typecheck, formatting and production build; isolated desktop/mobile schedule, extra-session and timer checks.
+- [ ] Next milestone: Markdown import preview and explicit deduplicated save, with editable output and no inferred completion.
+
+One weekly schedule per scope is supported. Linking an existing activity reuses one weekday template; other selected weekdays create new templates, as disclosed in the form. It does not merge a family of pre-existing daily activities. Restore does not automatically resume archived schedules. Saved-session totals exclude running time; consistency counts fully completed elapsed scheduled days, not mastery or recorded hours. Physical-device and target-container release checks remain outstanding.
+
+## Sprint 6 — Learning Roadmaps
+
+- [x] Inspect existing schema, scheduling, timers and working UI; preserve existing data.
+- [x] Add versioned additive roadmap/section/step migration, validation and retry-safe services.
+- [x] Category overview with current topic, step progress, next incomplete step and existing category study time/last studied date.
+- [x] Roadmap detail, collapsible sections, create/edit/reorder/delete, resource links, explicit completion/undo and archive/restore.
+- [x] Test migration against populated previous schema including a running timer; verify desktop/mobile and all checks.
+- [x] Add optional study-session-to-step associations and historical title snapshots; test corrections, timer switching, retries and deleted/archived topic history.
+- [x] Add optional task-detail topic selection, roadmap access and lightweight Home topic display without requiring selection or changing completion rules.
+- [ ] Verify integrated flows on actual Mac/iPhone PWAs after a separately authorized release.
+
+Sprint 6 implementation is complete locally. Category time includes existing closed sessions; roadmap/step time uses explicit session links only. DSA remains a simple Home activity. No sample roadmaps are seeded. Task topic defaults apply to a single occurrence; future template-wide defaults remain outside this sprint.
+
+- [x] 57 tests including link corrections, timer switch rollback, historical labels, rendered controls and upgrades from both pre-roadmap and roadmap schemas.
+- [x] Desktop and 375px browser flow: optional topic, start/pause, manual logs, change/remove/relink, persisted Home topic, step totals and unchanged mastery.
+- [x] Lint, typecheck, formatting and production build; update release instructions for migration 0004.
+- [ ] Separately authorized target-container build, restored-copy rehearsal and Mac/iPhone PWA smoke checks before declaring the deployed release verified.
 
 ## Sprint 5 — deployment preparation
 

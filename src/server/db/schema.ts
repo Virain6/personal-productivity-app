@@ -200,3 +200,142 @@ export const habitRecords = sqliteTable(
     ),
   ],
 );
+
+export const roadmaps = sqliteTable("roadmaps", {
+  color: text("color").notNull().default("purple"),
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  category: text("category").notNull(),
+  description: text("description").notNull().default(""),
+  goal: text("goal").notNull().default(""),
+  targetDate: text("target_date"),
+  version: integer("version").notNull().default(1),
+  archived: integer("archived", { mode: "boolean" }).notNull().default(false),
+  currentStepId: text("current_step_id"),
+  createdAt: integer("created_at").notNull(),
+});
+export const roadmapSections = sqliteTable(
+  "roadmap_sections",
+  {
+    id: text("id").primaryKey(),
+    roadmapId: text("roadmap_id")
+      .notNull()
+      .references(() => roadmaps.id),
+    title: text("title").notNull(),
+    description: text("description").notNull().default(""),
+    objective: text("objective").notNull().default(""),
+    resourceUrl: text("resource_url").notNull().default(""),
+    position: integer("position").notNull(),
+    archived: integer("archived", { mode: "boolean" }).notNull().default(false),
+    deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
+  },
+  (t) => [index("roadmap_section_order").on(t.roadmapId, t.position)],
+);
+export const learningSteps = sqliteTable(
+  "learning_steps",
+  {
+    id: text("id").primaryKey(),
+    sectionId: text("section_id")
+      .notNull()
+      .references(() => roadmapSections.id),
+    title: text("title").notNull(),
+    description: text("description").notNull().default(""),
+    objective: text("objective").notNull().default(""),
+    status: text("status", {
+      enum: ["not_started", "in_progress", "needs_review", "completed"],
+    })
+      .notNull()
+      .default("not_started"),
+    resourceUrl: text("resource_url").notNull().default(""),
+    position: integer("position").notNull(),
+    completed: integer("completed", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    deleted: integer("deleted", { mode: "boolean" }).notNull().default(false),
+  },
+  (t) => [index("learning_step_order").on(t.sectionId, t.position)],
+);
+
+// Optional associations keep existing task and timer rows unchanged.
+export const taskLearning = sqliteTable("task_learning", {
+  taskId: text("task_id")
+    .primaryKey()
+    .references(() => tasks.id),
+  stepId: text("step_id").references(() => learningSteps.id),
+  version: integer("version").notNull().default(1),
+});
+export const sessionLearning = sqliteTable(
+  "session_learning",
+  {
+    sessionId: text("session_id")
+      .primaryKey()
+      .references(() => sessions.id),
+    stepId: text("step_id").references(() => learningSteps.id),
+    roadmapId: text("roadmap_id").references(() => roadmaps.id),
+    sectionId: text("section_id").references(() => roadmapSections.id),
+    roadmapTitle: text("roadmap_title").notNull().default(""),
+    sectionTitle: text("section_title").notNull().default(""),
+    stepTitle: text("step_title").notNull().default(""),
+    version: integer("version").notNull().default(1),
+  },
+  (t) => [index("session_learning_step").on(t.stepId)],
+);
+
+export const studySchedules = sqliteTable("study_schedules", {
+  id: text("id").primaryKey(),
+  roadmapId: text("roadmap_id")
+    .notNull()
+    .references(() => roadmaps.id),
+  sectionId: text("section_id").references(() => roadmapSections.id),
+  version: integer("version").notNull().default(1),
+  createdDate: text("created_date").notNull(),
+});
+export const studyScheduleVersions = sqliteTable(
+  "study_schedule_versions",
+  {
+    id: text("id").primaryKey(),
+    scheduleId: text("schedule_id")
+      .notNull()
+      .references(() => studySchedules.id),
+    version: integer("version").notNull(),
+    effectiveFrom: text("effective_from").notNull(),
+    config: text("config", { mode: "json" })
+      .$type<import("../../lib/module-types").StudyScheduleConfig>()
+      .notNull(),
+  },
+  (t) => [uniqueIndex("study_schedule_version").on(t.scheduleId, t.version)],
+);
+export const studyTemplateLinks = sqliteTable(
+  "study_template_links",
+  {
+    templateId: text("template_id")
+      .primaryKey()
+      .references(() => templates.id),
+    scheduleId: text("schedule_id")
+      .notNull()
+      .references(() => studySchedules.id),
+    weekday: integer("weekday").notNull(),
+  },
+  (t) => [uniqueIndex("study_schedule_weekday").on(t.scheduleId, t.weekday)],
+);
+export const taskStudy = sqliteTable("task_study", {
+  taskId: text("task_id")
+    .primaryKey()
+    .references(() => tasks.id),
+  scheduleId: text("schedule_id").references(() => studySchedules.id),
+  roadmapId: text("roadmap_id")
+    .notNull()
+    .references(() => roadmaps.id),
+  sectionId: text("section_id").references(() => roadmapSections.id),
+  cancelled: integer("cancelled", { mode: "boolean" }).notNull().default(false),
+  managedVersion: integer("managed_version").notNull().default(1),
+});
+
+// Retirement hides obsolete unworked occurrences without deleting their identity.
+export const retiredStudyTasks = sqliteTable("retired_study_tasks", {
+  taskId: text("task_id")
+    .primaryKey()
+    .references(() => tasks.id),
+  reason: text("reason").notNull(),
+  retiredAt: integer("retired_at").notNull(),
+});

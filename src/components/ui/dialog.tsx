@@ -8,18 +8,26 @@ export function Dialog({
   title,
   description,
   children,
+  layout = "dialog",
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
   description: string;
   children: ReactNode;
+  layout?: "dialog" | "panel";
 }) {
   return (
     <Primitive.Root open={open} onOpenChange={onOpenChange}>
       <Primitive.Portal>
         <Primitive.Overlay className="fixed inset-0 z-40 bg-black/65" />
-        <Primitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90dvh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border border-border bg-surface p-5 shadow-xl">
+        <Primitive.Content
+          className={
+            layout === "panel"
+              ? "fixed inset-y-0 right-0 z-50 h-dvh w-full overflow-y-auto border-l border-border bg-surface px-5 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-6 shadow-xl md:max-w-lg"
+              : "fixed left-1/2 top-1/2 z-50 max-h-[90dvh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border border-border bg-surface p-5 shadow-xl"
+          }
+        >
           <Primitive.Title className="pr-10 text-lg font-semibold">
             {title}
           </Primitive.Title>

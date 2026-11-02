@@ -13,6 +13,7 @@ export const categories = [
 export type Category = (typeof categories)[number];
 export type TaskStatus = "pending" | "in_progress" | "done" | "skipped";
 export type Task = {
+  studyRoadmap?: { id: string; title: string; color: string } | null;
   id: string;
   templateId: string | null;
   occurrenceDate: string | null;
@@ -31,8 +32,13 @@ export type Task = {
   createdAt: number;
   updatedAt: number;
   actualMs: number;
+  learning?: {
+    version: number;
+    topic: import("./learning-types").StudyTopic | null;
+  };
 };
 export type Session = {
+  learning?: import("./learning-types").StudyLink | null;
   id: string;
   taskId: string;
   startedAt: number;

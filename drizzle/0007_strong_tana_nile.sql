@@ -1,0 +1,1 @@
+ALTER TABLE `roadmaps` ADD `color` text DEFAULT 'purple' NOT NULL;

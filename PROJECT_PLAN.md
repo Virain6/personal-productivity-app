@@ -4,6 +4,14 @@
 >
 > Status: specification, not an implemented application. Recreated and reviewed October 24, 2026. Work through the milestones in order; do not build every feature at once.
 
+## Current Learning direction — Sprint 6.6 (2026-10-30)
+
+This decision supersedes earlier automatic weekly learning seeds and category-based Learning UI. The hierarchy is Roadmap → Modules → Steps. Roadmaps have custom names, optional descriptions/goals/target dates and a curated accent color (default purple). No learning category is required or displayed. Existing category columns remain for compatibility; ordinary task categories are unchanged.
+
+Fresh installations create no learning routines or roadmaps. The original weekly split below is a historical reference, not an automatic seed. Existing history is retained; obsolete preset recurrence is retired through an explicit backup-first maintenance operation. Users configure an optional weekly roadmap schedule during creation or in its detail page; the existing recurrence engine owns task identities. Only the roadmap may own recurring study. Modules and steps organize content and never independently generate calendar activities. Study Anytime creates or reuses a roadmap activity with an optional step, without changing recurrence. An explicit additional-session choice permits multiple sessions on the same date. Tasks display roadmap accents and current/next steps. Time, task completion and mastery remain separate.
+
+Markdown import and structured DSA tracking remain deferred. No production cleanup or deployment is implied by this revision.
+
 ## 1. Product decisions and assumptions
 
 This plan incorporates the original user messages retrieved from the linked Productivity Dashboard Design conversation and the current delivery requirements. The earlier assistant artifacts were returned only as content-reference placeholders, so this is a complete reconstructed specification, not a verbatim recovery. Suggested times, example habits/workouts, release boundaries, and implementation details are proposed editable defaults. The user's later instruction removes the initially mentioned notes feature.
@@ -82,7 +90,7 @@ Timezone, week start, weekly template editor, category colors, data export, back
 
 ## 4. Weekly study schedule
 
-Seed this schedule once during onboarding. Preserve the supplied subjects; the exact start times and shorter Saturday targets are proposed editable defaults.
+Historical reference only: Sprint 6.6 removes automatic learning seeds. Preserve the supplied subjects; the exact start times and shorter Saturday targets are proposed editable defaults.
 
 | Day | DSA | Additional focus | Specialization | Project | Applications |
 | --- | --- | --- | --- | --- | --- |
