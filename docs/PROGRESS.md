@@ -1,7 +1,23 @@
 # Progress
 
-Current phase: **Sprint 7A.2 — Learning and Habit Analytics complete locally.**
+Current phase: **Sprint 7A.3 — Weekly Review complete locally.**
 Last verified: 2026-11-03. No commit, push, production access or deployment.
+
+## Sprint 7A.3 — Weekly Review (2026-11-03)
+
+Started from clean commit 551f50d, preserving completed 7A.1/7A.2. Added /analytics/review, linked from Analytics with the existing navigation highlighted. Monday–Sunday current/previous/next navigation and saved-week history use local dates (America/Toronto by default). The report directly reuses getAnalytics, the existing seven-day chart, saved roadmap colors, and habit eligibility. Shows tracked study, saved-session count, required-task progress, total completed tasks, planned/completed learning occurrences, future/open/skipped/past states, most-active day (including ties), previous-period study comparison and separate flexible weekly quotas. No duplicated session accounting or stored aggregate totals.
+
+Reflection text is persisted in one row per Monday week with Wins, Challenges and Next Week’s Priorities (3000 characters each). Saves reuse guarded commands, immediate transactions and operation receipts. Version checks reject conflicting edits rather than overwrite another device. Loading or navigating never creates empty reviews. The editor exposes saving/saved/unsaved/error states, preserves drafts on failure and refresh, confirms week changes, warns on leaving, and recovers unsaved text within the same browser tab. Draft recovery is not cross-device persistence; only Save writes to SQLite. Historical reviews remain editable.
+
+Added migration 0009_volatile_falcon.sql and Drizzle metadata for weekly_reviews only. Existing schema/data are not altered. Tests upgraded an isolated 0008 database and compared retained rows, including tasks, running timer and Learning/Habits history. No personal database was migrated; production was not accessed. A copied synthetic database at /private/tmp/planner73-preview.db was used for browser verification.
+
+Verification: **106/106 tests pass**, including eight new checks for week/year/Toronto boundaries, unchanged analytics attribution/comparisons/future semantics, no-data weeks, create/edit/retry/conflict/history/validation, draft recovery, repeated loaded-review edits, and 0008 upgrade preservation. Lint, typecheck, formatting, production build and git diff whitespace checks pass. An edit-path metadata/version issue found during review was fixed and regression-tested. Existing Home, Habits, timers, schedules and Analytics tests remain passing.
+
+Browser checks on loopback port 3143 verified saved reflection creation, repeated edits, reopening through history, unsaved-week dialog cancellation, changing weeks with a retained draft, recovery and save. Read-only SQLite verification confirmed one row at version 4 after edits, integrity ok, and zero FK violations. Desktop and 375px layouts were inspected with no horizontal overflow; browser error/warning logs were empty. Screenshot: /private/tmp/planner73-weekly-review.png. The preview is stopped after verification. Native reload confirmation automation stalled in the embedded browser; a fresh tab verified persistence, but real Safari/iPhone reload/close prompts and VoiceOver remain manual checks.
+
+Limits: statistics are dynamic and reflect corrections/current task state, not frozen historical snapshots. Current-week comparisons use matching elapsed dates, not a full prior week. Existing uncertain habit archive/rest gaps and full-week quota rules are retained. Unsaved drafts depend on browser session storage and do not survive closing the tab reliably; save before leaving or moving devices. No offline server-write queue or AI reflections.
+
+**7A.3 is ready for local review.** 7B Calendar Improvements remain unstarted. Before running this version against a used database, follow the documented verified-backup migration procedure. No commit, push, deployment or production connection.
 
 ## Sprint 7A.2 — Learning and Habit Analytics (2026-11-03)
 

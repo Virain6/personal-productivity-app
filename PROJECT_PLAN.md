@@ -12,6 +12,8 @@ Analytics uses saved session durations, explicit task statuses, historical habit
 
 Milestone 7A.2 adds learning/habit activity calendars, study consistency, current mastery and historical goal reporting over persisted records. Daily adherence and full-week quotas remain separate; missing data never implies success. Historical archive/rest gaps are disclosed. No analytics storage migration is needed.
 
+Milestone 7A.3 adds a focused Weekly Review under Analytics. Statistics remain derived from existing records; one versioned row per Monday week stores only Wins, Challenges and Next Week’s Priorities. These explicitly requested reflections do not introduce a standalone notes system. 7B remains pending.
+
 ## Current Learning direction — Sprint 6.6 (2026-10-30)
 
 This decision supersedes earlier automatic weekly learning seeds and category-based Learning UI. The hierarchy is Roadmap → Modules → Steps. Roadmaps have custom names, optional descriptions/goals/target dates and a curated accent color (default purple). No learning category is required or displayed. Existing category columns remain for compatibility; ordinary task categories are unchanged.

@@ -1,3 +1,4 @@
+import { saveWeeklyReview } from "./weekly-reviews";
 import { mutateStudySchedule } from "./study-schedules";
 import { linkNewSession, setTaskTopic, setSessionTopic } from "./study-links";
 import { mutateLearning } from "./learning";
@@ -35,7 +36,8 @@ export function mutate(store: Store, input: unknown, now = Date.now()) {
       const c = parsed.command;
       const timezone = store.db.select().from(settings).get()!.timezone;
       let id: string | undefined;
-      if (c.action === "roadmapCreate" || c.action === "roadmapChange")
+      if (c.action === "weeklyReviewSave") id = saveWeeklyReview(store, c, now);
+      else if (c.action === "roadmapCreate" || c.action === "roadmapChange")
         id = mutateLearning(store, c, now);
       else if (c.action === "studyScheduleSave" || c.action === "studyTask")
         id = mutateStudySchedule(store, c, now);

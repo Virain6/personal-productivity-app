@@ -188,7 +188,7 @@ test("roadmap creates and changes are receipt-safe", () => {
     s.sqlite.close();
   }
 });
-for (const oldCount of [3, 4, 5, 6, 7, 8])
+for (const oldCount of [3, 4, 5, 6, 7, 8, 9])
   test(`additive migration preserves existing data from ${oldCount} migrations`, () => {
     const root = mkdtempSync(join(tmpdir(), "planner-learning-upgrade-")),
       folder = join(root, "old");

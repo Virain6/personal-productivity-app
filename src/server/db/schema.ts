@@ -339,3 +339,19 @@ export const retiredStudyTasks = sqliteTable("retired_study_tasks", {
   reason: text("reason").notNull(),
   retiredAt: integer("retired_at").notNull(),
 });
+
+export const weeklyReviews = sqliteTable(
+  "weekly_reviews",
+  {
+    week: text("week").primaryKey(),
+    wins: text("wins").notNull().default(""),
+    challenges: text("challenges").notNull().default(""),
+    priorities: text("priorities").notNull().default(""),
+    version: integer("version").notNull().default(1),
+    updatedAt: integer("updated_at").notNull(),
+  },
+  (t) => [
+    check("review_monday", sql`strftime('%w', ${t.week}) = '1'`),
+    check("review_version", sql`${t.version}>0`),
+  ],
+);

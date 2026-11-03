@@ -59,6 +59,7 @@ export function AnalyticsPage() {
         <div>
           <p className={styles.eyebrow}>A little perspective</p>
           <h1>Analytics</h1>
+          <Link href="/analytics/review">Open Weekly Review →</Link>
           <p className={styles.subtitle}>
             See where your time goes, and how your learning is taking shape.
           </p>

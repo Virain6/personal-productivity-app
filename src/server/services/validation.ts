@@ -1,3 +1,4 @@
+import { isReviewWeek } from "../../lib/weekly-review";
 import { studyScheduleCommand } from "./study-schedule-validation";
 import { learningCommand } from "./learning-validation";
 import { habitCommand } from "./habit-validation";
@@ -111,6 +112,18 @@ export const command = z.discriminatedUnion("action", [
 export const mutation = z.object({
   operationKey: z.string().uuid(),
   command: z.discriminatedUnion("action", [
+    z
+      .object({
+        action: z.literal("weeklyReviewSave"),
+        week: z
+          .string()
+          .refine(isReviewWeek, "Choose a valid Monday-start week."),
+        version: z.number().int().min(0),
+        wins: z.string().max(3000),
+        challenges: z.string().max(3000),
+        priorities: z.string().max(3000),
+      })
+      .strict(),
     ...command.options,
     ...habitCommand.options,
     ...learningCommand.options,

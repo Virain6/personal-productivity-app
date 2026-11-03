@@ -1,6 +1,6 @@
 # Development tasks
 
-Current phase: **Sprint 7 — Milestone 7A.2 Learning and Habit Analytics complete locally.**
+Current phase: **Sprint 7 — Milestone 7A.3 Weekly Review complete locally.**
 
 User reports successful Ubuntu deployment and Mac/iPhone PWA installation (2026-10-28). Prior operational checklist items below remain historical agent verification limits, not a claim that deployment has not occurred.
 
@@ -33,15 +33,25 @@ Full requirements: [SPRINT_7.md](SPRINT_7.md), refined by [SPRINT_7_RESUME.md](S
 - [x] Formatting, documentation and preservation review.
 - [ ] Real iPhone Safari/VoiceOver and target-container/restored-copy release checks.
 
+### 7A.3 — Weekly Review
+
+- [x] Dedicated Analytics → Weekly Review report with Monday–Sunday navigation and saved-week history.
+- [x] Reuse Analytics for study, roadmap, task, learning occurrence, habit and previous-period statistics.
+- [x] Seven-day chart, roadmap colors, compact task/habit progress, most active day and honest empty/future states.
+- [x] Save/edit Wins, Challenges and Next Week’s Priorities; unique week, optimistic version checks and retry receipts.
+- [x] Unsaved indicators, week-change confirmation, leave warning and tab-local draft recovery; no empty review on navigation.
+- [x] Additive migration 0009; isolated upgrade from 0008 preserves existing records.
+- [x] 106 tests, lint, typecheck, formatting, production build, desktop and 375px browser verification.
+- [ ] Real Safari/iPhone reload/close confirmation, VoiceOver and target-container/restored-copy release checks.
+
 ### Remaining milestones — not started in this change
 
-- [ ] 7A.3: weekly summary and persisted Wins/Challenges/Next Week’s Priorities with history.
 - [ ] 7B.1: Monday-first desktop Month view, compact activity indicators, day selection and mobile month picker.
 - [ ] 7B.2: occurrence-only rescheduling improvements, Quick Add for generic/roadmap activities and safe desktop dragging if practical.
 - [ ] 7B.3: mobile polish and remaining calendar interactions.
 - [ ] Complete-sprint release review and separately authorized deployment/device checks.
 
-Next implementation task: 7A.3 Weekly Review and saved reflections. Do not begin it as part of 7A.2. Archive/rest history gaps and period-bounded runs are documented limitations, not inferred success.
+Next milestone: 7B.1 Month view, only when requested. No 7B implementation was started during 7A.3. Existing archive/rest history limitations remain unchanged.
 
 ## Sprint 6.6 correction — roadmap-only calendar sources (2026-10-31)
 

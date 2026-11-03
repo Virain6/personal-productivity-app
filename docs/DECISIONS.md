@@ -111,3 +111,7 @@ The subsequent resume request refines the remaining order: 7A.2 learning/habit a
 ## 2026-11-03 — evidence-based learning and habit analytics
 
 Derive 7A.2 from existing records and historical habit rules without schema changes. Keep daily adherence, flexible weekly quotas, current mastery and recorded time separate. Show period-bounded verified runs instead of claiming all-time streaks. Preserve historical quantity units/targets. Unknown archive/rest history is disclosed rather than reconstructed from current flags/cursors. Stop at 7A.2; Weekly Review and Calendar milestones remain pending.
+
+## 2026-11-03 — Weekly Review stores reflections, not statistical snapshots
+
+Reuse Analytics over Monday–Sunday ranges and persist only the three expressly authorized reflection fields. Dynamic statistics reflect later corrections. One primary-key week plus optimistic versions and existing retry receipts protects edits. Keep browser-session recovery drafts distinct from server-saved reviews; no automatic empty records or offline mutation queue. Limit each reflection field to 3000 characters. Stop after verified 7A.3; 7B requires a later request.

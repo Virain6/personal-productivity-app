@@ -32,7 +32,9 @@ export function AppShell({ children }: Readonly<{ children: ReactNode }>) {
   const [more, setMore] = useState(false);
   function navLink(item: (typeof links)[number], compact = false) {
     const Icon = item.icon;
-    const active = pathname === item.href;
+    const active =
+      pathname === item.href ||
+      (item.href === "/analytics" && pathname.startsWith("/analytics/"));
     return (
       <Link
         key={item.href}
@@ -90,7 +92,9 @@ export function AppShell({ children }: Readonly<{ children: ReactNode }>) {
             <Moon size={16} className="text-accent-hover md:hidden" />
             Personal workspace <span className="mx-2 text-border">/</span>
             <span className="text-foreground">
-              {links.find((l) => l.href === pathname)?.label ?? "Planner"}
+              {pathname === "/analytics/review"
+                ? "Weekly Review"
+                : (links.find((l) => l.href === pathname)?.label ?? "Planner")}
             </span>
           </span>
         </header>

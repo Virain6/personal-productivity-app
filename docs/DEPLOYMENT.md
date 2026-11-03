@@ -308,3 +308,9 @@ Analytics lazily materializes the requested date range through the same occurren
 ## Sprint 7A.2 release considerations
 
 Read-time analytics/UI only: no new migration (head remains 0008), dependency or cleanup operation beyond 7A.1. Existing backup, build and restored-copy rehearsal instructions apply. Check zero/limit/rest records, archived history and roadmap time against a restored copy before separately authorized deployment. No production access occurred during development.
+
+## Sprint 7A.3 migration — 0009
+
+0009_volatile_falcon.sql creates weekly_reviews only (Monday week primary key, three text fields, version and updated timestamp). Include its Drizzle snapshot/journal in the release. No dependency changes or existing-row backfill. Rehearsed only on isolated test databases, including upgrade from 0008 with existing records. No personal/production migration was applied.
+
+Before opening a used local database with the new build, create and verify a SQLite backup including WAL data; the development connection auto-applies pending migrations and is not the backup-first deployment wrapper. For a separately authorized production upgrade, stop the app and use the existing scripts/deploy-db.mjs migrate workflow (section 4), which verifies a backup before pending migrations. Rehearse on a restored copy first. Verify review save/edit/history, existing timers and Analytics after migration. Do not reset or seed replacement data. Reflection text is personal data and is included in normal database backups.

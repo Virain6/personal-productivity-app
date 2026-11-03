@@ -93,3 +93,9 @@ Charts expose exact HH:MM:SS tooltips and native disclosure tables for keyboard/
 Extend existing roadmap drill-downs with compact mastery/consistency indicators, a selected-roadmap trend and Monday-first monthly heatmap. Use saved roadmap accents. Habit activity has a selector, compact counters, monthly calendar, weekly trends, actual workout distribution and quantity/goal lines. Desktop uses two columns; below 850px stack content. Month selection stays within the Analytics date range.
 
 Cells are at least 44px tall, with full date/result accessible names, native keyboard controls, tooltips and announced selected-day details. Green means recorded goal met; red exceeded; solid amber explicitly below goal; dashed amber expected/unlogged; blue recorded without a goal or unscheduled study; patterned rest; neutral dashed future; muted unknown. Legends and text accompany colors. Quantity charts preserve zero, leave missing gaps and expose exact-value tables. No invented success or punitive streak language.
+
+## Sprint 7A.3 — Weekly Review
+
+Use a focused Analytics subpage with a quiet report header, clearly dated Monday–Sunday controls and three compact summary cards. Reuse the seven-day time chart and exact-value disclosure. Roadmap share bars use saved accents; task/habit progress is visually separate from recorded time. Keep the report to one chart and a compact roadmap/learning-activity panel. Future/no-data states use neutral explanatory text.
+
+Reflections are a single main panel beside a compact saved-week history on desktop; stack both and the report columns on mobile. Textareas use 16px type, visible labels, character limits and existing focus treatment. Saved/unsaved/saving and errors are explicit. Week-change confirmation reuses the existing focus-trapped Dialog with Keep editing or Change week, keep draft actions. No AI-generated filler, gamification or standalone notes feature.
