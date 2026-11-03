@@ -1,0 +1,327 @@
+.panel {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  background: var(--surface);
+  min-width: 0;
+}
+.heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.heading h2 {
+  font-size: 18px;
+  font-weight: 500;
+}
+.heading a {
+  color: var(--accent-hover);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.eyebrow {
+  font-size: 10px;
+  color: var(--accent-hover);
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  margin-bottom: 5px;
+}
+.note {
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--muted);
+  margin: 10px 0;
+}
+.picker {
+  display: grid;
+  gap: 6px;
+  max-width: 420px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin: 18px 0 12px;
+}
+.summary span {
+  font-size: 11px;
+  color: var(--muted);
+}
+.summary strong {
+  display: block;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--foreground);
+  line-height: 1.5;
+}
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  margin: 18px 0;
+}
+.columns h3,
+.quantity h3 {
+  font-size: 13px;
+  font-weight: 500;
+}
+.learning {
+  border-top: 1px solid var(--border);
+  margin-top: 18px;
+  padding-top: 6px;
+  min-width: 0;
+}
+.mastery {
+  width: 100%;
+  height: 6px;
+  border: 0;
+  display: block;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.mastery::-webkit-progress-bar {
+  background: var(--elevated);
+}
+.mastery::-webkit-progress-value {
+  background: var(--mastery-color, var(--accent-hover));
+}
+.calendarHeader {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.calendarHeader h3 {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.calendarHeader label {
+  max-width: 155px;
+  flex-shrink: 0;
+}
+.calendarHeader select {
+  font-size: 11px;
+  padding-inline: 8px;
+}
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.weekday {
+  text-align: center;
+  font-size: 10px;
+  color: var(--muted);
+  padding-bottom: 5px;
+}
+.day {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  min-height: 44px;
+  font-size: 11px;
+  position: relative;
+}
+.day:disabled {
+  opacity: 0.25;
+}
+.day[aria-pressed="true"] {
+  outline: 2px solid var(--accent-hover);
+  outline-offset: 1px;
+}
+.day:hover:not(:disabled) {
+  filter: brightness(1.2);
+}
+.day[data-state="met"],
+.legend i[data-state="met"] {
+  background: #48b89225;
+  border-color: #48b89280;
+}
+.day[data-state="exceeded"],
+.legend i[data-state="exceeded"] {
+  background: #f59b9b22;
+  border-color: #f59b9b80;
+}
+.day[data-state="missed"],
+.legend i[data-state="missed"] {
+  background: #dfbd7c18;
+  border-color: #dfbd7c65;
+}
+.day[data-state="recorded"],
+.legend i[data-state="recorded"] {
+  background: #86b8dc25;
+  border-color: #86b8dc80;
+}
+.day[data-state="rest"],
+.legend i[data-state="rest"] {
+  background: repeating-linear-gradient(
+    135deg,
+    transparent,
+    transparent 4px,
+    #a5a6b015 4px,
+    #a5a6b015 6px
+  );
+}
+.day[data-state="future"],
+.legend i[data-state="future"] {
+  border-style: dashed;
+  color: var(--muted);
+}
+.day[data-state="unknown"],
+.legend i[data-state="unknown"] {
+  opacity: 0.55;
+}
+.dot {
+  position: absolute;
+  bottom: 4px;
+  left: calc(50% - 2px);
+  height: 3px;
+  width: 3px;
+  background: var(--success);
+  border-radius: 50%;
+}
+.dayDetail {
+  min-height: 45px;
+  font-size: 11px;
+  color: var(--muted);
+  margin: 12px 0;
+  line-height: 1.5;
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  font-size: 10px;
+  color: var(--muted);
+}
+.legend span {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+.legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+}
+.detail {
+  min-width: 0;
+}
+.weekly {
+  margin-top: 20px;
+}
+.weekly > p:not(.note) {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  gap: 4px;
+  font-size: 11px;
+}
+.weekly strong {
+  font-weight: 500;
+}
+.weekly small {
+  color: var(--muted);
+}
+.workouts {
+  margin-top: 20px;
+}
+.workouts > div {
+  display: grid;
+  grid-template-columns: minmax(70px, 1fr) 1fr 25px;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+  font-size: 12px;
+}
+.workouts progress {
+  width: 100%;
+  height: 6px;
+  accent-color: var(--accent-hover);
+}
+.quantity {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  margin-top: 16px;
+}
+.quantityChart {
+  min-width: 0;
+  overflow: clip;
+}
+.values {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 12px;
+}
+.values summary {
+  cursor: pointer;
+  min-height: 36px;
+  align-content: center;
+}
+.values > div {
+  max-height: 250px;
+  overflow: auto;
+}
+.values table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.values th,
+.values td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 400;
+}
+@media (max-width: 850px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .panel {
+    padding: 16px 12px;
+  }
+  .heading {
+    flex-wrap: wrap;
+  }
+  .summary {
+    gap: 16px;
+  }
+  .calendarHeader label {
+    max-width: 145px;
+  }
+}
+
+.day[data-state="below"],
+.legend i[data-state="below"] {
+  background: #dfbd7c18;
+  border-color: #dfbd7c65;
+}
+.day[data-state="missed"] {
+  border-style: dashed;
+}
+.workouts progress {
+  border: 0;
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--elevated);
+}
+.workouts progress::-webkit-progress-bar {
+  background: var(--elevated);
+}
+.workouts progress::-webkit-progress-value {
+  background: var(--accent-hover);
+}
+.workouts progress::-moz-progress-bar {
+  background: var(--accent-hover);
+}
+
+.heatmap[data-learning="true"] .day[data-state="met"],
+.heatmap[data-learning="true"] .legend i[data-state="met"] {
+  background: color-mix(in srgb, var(--activity-accent) 20%, transparent);
+  border-color: color-mix(in srgb, var(--activity-accent) 55%, transparent);
+}

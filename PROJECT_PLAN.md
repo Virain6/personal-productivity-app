@@ -4,6 +4,14 @@
 >
 > Status: specification, not an implemented application. Recreated and reviewed October 24, 2026. Work through the milestones in order; do not build every feature at once.
 
+## Current development — Sprint 7 (2026-11-02)
+
+The complete user-authorized scope is preserved in docs/SPRINT_7.md. Implement in verified milestones: 7A.1 Analytics foundations; 7A.2 learning and habit analytics; 7A.3 Weekly Review; 7B.1 calendar Month view; 7B.2 rescheduling and Quick Add; 7B.3 mobile polish. The revised order is preserved in docs/SPRINT_7_RESUME.md. The existing roadmap-only scheduling decision and long-term requirements below remain in force. Stop after a complete milestone rather than shipping partial features across the sprint.
+
+Analytics uses saved session durations, explicit task statuses, historical habit rules and current roadmap mastery as separate measures. Empty periods must not imply success. The specifically requested weekly Wins, Challenges and Next Week’s Priorities fields are authorized for 7A.3; they do not introduce a standalone notes module. Local development only; no automatic production access, commit, push or deployment.
+
+Milestone 7A.2 adds learning/habit activity calendars, study consistency, current mastery and historical goal reporting over persisted records. Daily adherence and full-week quotas remain separate; missing data never implies success. Historical archive/rest gaps are disclosed. No analytics storage migration is needed.
+
 ## Current Learning direction — Sprint 6.6 (2026-10-30)
 
 This decision supersedes earlier automatic weekly learning seeds and category-based Learning UI. The hierarchy is Roadmap → Modules → Steps. Roadmaps have custom names, optional descriptions/goals/target dates and a curated accent color (default purple). No learning category is required or displayed. Existing category columns remain for compatibility; ordinary task categories are unchanged.

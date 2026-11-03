@@ -1,7 +1,35 @@
 # Progress
 
-Current phase: **Sprint 6.6 correction — roadmap-only recurrence and Study Anytime complete locally.**
-Last verified: 2026-10-31. No commit, push, production access or deployment.
+Current phase: **Sprint 7A.2 — Learning and Habit Analytics complete locally.**
+Last verified: 2026-11-03. No commit, push, production access or deployment.
+
+## Sprint 7A.2 — Learning and Habit Analytics (2026-11-03)
+
+Recovered the interrupted implementation and all uncommitted 7A.1 work. Before resuming, the learning/habit projections and UI were implemented, but a final unscheduled-study test expectation was stale; mobile verification, final formatting and documentation remained unfinished. Corrected that expectation, added module-total/last-study assertions and empty/voluntary-entry coverage, and clarified unknown workout history. No features were rebuilt.
+
+Learning now includes selected-roadmap monthly activity, daily saved-time trends, saved accents, elapsed scheduled-day study consistency and current mastery, alongside existing module totals/last-study information. Study comes only from closed saved records, split by local date; task/step completion is independent. Habit reporting supports binary, build, limit, avoid, awareness and workouts through existing outcomes/revisions. Includes monthly heatmaps, eligible-day rates, selected-period verified runs, weekly trends/quotas, quantity/goal charts with exact tables, and actual workout distributions. Explicit zero remains distinct from missing; historical units stay separate.
+
+Verification: **98/98 automated tests pass**. Lint, typecheck, formatting and production build pass. Ten activity tests plus the preserved suite cover zero/missing, historical corrections/targets/units, weekly eligibility, streaks, rest/archive uncertainty, no-data and voluntary logs, Toronto boundaries/DST, mastery versus time, module totals, unscheduled study and existing Home/Habits/timer/scheduling behavior. The interrupted run's one stale test expectation is fixed; it is not an outstanding failure.
+
+Browser verification used only the synthetic /private/tmp/planner72-preview.db on loopback port 3142. Desktop and 375px checks covered roadmap selection, mastery/modules, zero/exceeded/unlogged cells, selectable details, month changes, full-month activity, weekly quotas, quantity charts and empty current-period states. Mobile stacked cleanly with no horizontal overflow; console warnings/errors were empty. Desktop evidence: /private/tmp/planner72-habit-analytics.png. No personal or production records were modified. Preview stopped after verification.
+
+Limitations: runs are verified only within the chosen period, not all-time streaks. Partial/changed-rule weeks are not quota-rated. The database has no archive-event or historical workout-cursor timeline: missing archived/rest-capable workout dates are unknown and excluded; restored habits' former archive windows cannot be reconstructed. Real iPhone Safari/VoiceOver and target-container/restored-copy checks remain manual release gates.
+
+No schema changes or new dependency beyond 7A.1; migration head remains 0008. **7A.2 is ready for local review.** 7A.3 Weekly Review and all 7B calendar milestones remain unstarted. No commit, push, production connection or deployment.
+
+## Sprint 7A.1 — Analytics foundations (2026-11-02)
+
+Recovered the clean Sprint 6.6 baseline at e989042 and verified all 79 existing tests before implementation. The resume request arrived during final verification; existing Analytics work was preserved and the remaining mobile controls/documentation were completed. The latest milestone order is recorded in docs/SPRINT_7_RESUME.md.
+
+Implemented a dedicated Analytics route/navigation item; timezone-aware week/last-week/month/custom selection (maximum 93 days); previous/next periods; saved study time, all tracked time, task completion and study-session cards. Added interactive daily bars, grouped planned/recorded bars, eight-week trends and selectable roadmap-color distributions. Roadmap detail shows module durations, current completed-step counts, last study in the selected period and Learning links. Mastery and task completion never manufacture recorded time. Exact-value disclosure tables provide accessible alternatives to chart tooltips.
+
+Server reporting uses bounded saved-session queries and the existing deduplicated occurrence engine. No schema/migration or personal-data cleanup was required. Archived attribution, midnight/DST splitting, local session-start counts, skipped/optional/future task semantics, partial-period comparisons and absent-data states are explicit. The browser receives aggregates rather than raw session history. Recharts 3.10.1 and matching react-is 19.3.1 are pinned and dynamically loaded only on Analytics.
+
+Verification: **88/88 automated tests pass** (nine new Analytics tests plus all existing Home, Habits, scheduling, Learning, timers, manual logs and migration tests). Lint, typecheck and production build pass. Tests cover ranges/leap months/year boundaries, timer/manual aggregation, running/unlinked time, planned/completed/skipped/optional/cancelled/retired tasks, midnight carry-over, Toronto 23/25-hour days, timezone settings, archived/renamed attribution, comparison windows, recurrence deduplication, saved manual logs and moved occurrences.
+
+Production-mode browser verification used only /private/tmp/planner7-preview.db on port 3141, with explicitly synthetic test records. Desktop and a 375px viewport were checked: presets, chart values and keyboard tooltip, exact-value tables, roadmap/module drill-down, custom-range error handling, mobile More navigation, loading/empty states and no horizontal page overflow. Fixed long numeric axis labels, chart overflow, cramped mobile custom-date fields and simultaneous selected preset states. Home remained in mobile Day view; started and paused its timer, then confirmed the saved session appeared in Learning and Analytics. Learning and Habits pages opened normally. Browser console showed no application errors. Native date automation did not reliably change valid picker values; real Safari/iPhone custom-date entry remains a manual check, while range validation/navigation is covered by automated tests.
+
+This completes only 7A.1. No new calendar interaction was added. Next: **7A.2 learning/habit analytics**, including consistency, progress and activity heatmaps with historical goal eligibility. Then 7A.3 Weekly Review persistence, 7B.1 Month view, 7B.2 rescheduling/Quick Add and 7B.3 mobile polish. The full Sprint 7 is not ready for release review; 7A.1 is available for local review. Physical Safari/PWA/VoiceOver and target-container/restored-copy rehearsal remain release checks. No commit, push, production access or deployment.
 
 ## Sprint 6.6 correction — roadmap-only sources (2026-10-31)
 

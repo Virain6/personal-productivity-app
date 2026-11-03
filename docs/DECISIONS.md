@@ -97,3 +97,17 @@ Keep roadmap/module schedules explicitly additive, with one stable series per sc
 The user's explicit correction supersedes the October 30 additive module-schedule decision. Only roadmaps recur; modules/steps organize content and attribute study. Preserve legacy module schedule rows for history, block their generation, and retire eligible future instances explicitly. Study Anytime uses the same task/timer transaction, reusing an open date activity unless the user requests an additional one.
 
 Use additive retirement markers rather than deleting old unworked tasks. Close exact identified seed templates to prevent regeneration; preserve meaningful history and edits. Cleanup is an explicit backup-first tool, never a startup migration. The user authorized applying it to the local development database only. Production requires a separately reviewed run and remains untouched.
+
+## 2026-11-02 — Sprint 7A.1 first, with explicit metric contracts
+
+Complete Analytics foundations as one tested milestone before habit reporting/reflections or calendar interaction changes, following the user's allowed milestones and AGENTS workflow. Preserve the complete Sprint 7 request in docs/SPRINT_7.md. The later weekly reflection fields are specifically authorized without expanding into a standalone notes feature.
+
+Use the existing saved-session and occurrence tables as sources; no schema change or new event ledger for this milestone. Label all time as tracked time rather than claiming every activity is productive. Time is additive per saved record, clipped at timezone-aware boundaries; overlapping records explicitly accepted by the user remain additive. Task completion is current state on planned dates; mastery is current step state. Both are disclosed rather than presented as historical event counts.
+
+Use Recharts 3.10.1 with matching react-is 19.3.1, pinned in the lockfile, for responsive axes and accessible interactive tooltips. Load it only on Analytics and retain exact-value tables. Simple selectable roadmap distribution rows reuse existing colors. Do not add a heavyweight chart dependency to Home or replace its existing progress components.
+
+The subsequent resume request refines the remaining order: 7A.2 learning/habit analytics, 7A.3 saved Weekly Review, 7B.1 Month view, 7B.2 rescheduling/Quick Add and 7B.3 mobile polish. Finish and verify the existing 7A.1 work before starting these; no completed implementation is restarted.
+
+## 2026-11-03 — evidence-based learning and habit analytics
+
+Derive 7A.2 from existing records and historical habit rules without schema changes. Keep daily adherence, flexible weekly quotas, current mastery and recorded time separate. Show period-bounded verified runs instead of claiming all-time streaks. Preserve historical quantity units/targets. Unknown archive/rest history is disclosed rather than reconstructed from current flags/cursors. Stop at 7A.2; Weekly Review and Calendar milestones remain pending.

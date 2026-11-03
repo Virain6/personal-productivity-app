@@ -298,3 +298,13 @@ The database must have the Learning schema before preview; use the existing back
 Afterward verify integrity/FKs, saved session and completion counts, no legacy future learning activities, roadmap recurrence, roadmap-only timer logs, one-off reuse/explicit extras, module history, Home and Habits. Refresh clients. Keep the verified backup and matching previous image; rollback requires restoring that pair to a new location, not deleting retirement markers blindly. Target Docker and actual device rehearsal remain unperformed here.
 
 Local application completed 2026-10-31 only: 15 templates closed, 74 unworked occurrences marked, zero module schedules, four past edited/logged occurrences preserved. Verified backup: backups/backup-2026-10-31T04-05-00-249Z-e3Qyyp/planner.db. No production access or deployment occurred.
+
+## Sprint 7A.1 release considerations
+
+This milestone adds Analytics UI/server aggregation and pinned Recharts/react-is dependencies. It adds **no migration**; the existing migration head remains 0008. Use the updated lockfile with npm ci when building the reviewed image. Existing backup, private-origin and persistent-volume procedures still apply; never reset the database or rerun retirement cleanup just to enable Analytics.
+
+Analytics lazily materializes the requested date range through the same occurrence engine as Home. Saved sessions/habits/mastery are not rewritten. Before a separately authorized release, rehearse the image on a restored copy, inspect a known week against saved logs, and check Mac/iPhone Safari/PWA behavior. Local browser verification is not a target-container or physical-device deployment rehearsal. The full Sprint 7 is not a release-complete claim while 7A.2 and 7B remain pending. No production connection, migration, cleanup or deployment was performed here.
+
+## Sprint 7A.2 release considerations
+
+Read-time analytics/UI only: no new migration (head remains 0008), dependency or cleanup operation beyond 7A.1. Existing backup, build and restored-copy rehearsal instructions apply. Check zero/limit/rest records, archived history and roadmap time against a restored copy before separately authorized deployment. No production access occurred during development.

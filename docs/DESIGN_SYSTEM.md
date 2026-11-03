@@ -79,3 +79,17 @@ Schedule forms ask only for weekdays, optional time, duration and pause state. R
 Only roadmap creation/detail exposes recurring weekdays. The create dialog starts with all days unchecked and explains that recurrence is optional; selecting a day reveals duration/start time. Module pages instead link back to the roadmap and retain study statistics.
 
 Study Anytime is available on every active roadmap, including those without steps or schedules. Its compact responsive dialog has an optional step, date, time, optional duration and separate Start now/Schedule session actions. An explicit additional-session checkbox distinguishes intentional extra work from reuse of an existing open activity. Errors retain inputs; buttons disable during save. Roadmap colors and existing Home controls are unchanged.
+
+## Analytics foundations — Sprint 7A.1
+
+Use a quiet header, compact date controls and four summary cards, followed by a two-column chart layout on wide screens and one column below 1100px. At phone widths, cards use two columns, date arrows span the row and the mobile More menu exposes Analytics. No Home/Habits redesign.
+
+Daily and eight-week bars use the existing purple accent, zero-baseline hour axes, subtle horizontal grid lines and no animation. Planned bars are neutral gray alongside recorded purple bars. Roadmap distribution rows use saved roadmap colors; selecting one reveals compact module time/current-mastery details and links. Do not encode task completion as recorded time or mastery. Real zero values stay zero; empty periods offer a Learning link rather than sample data.
+
+Charts expose exact HH:MM:SS tooltips and native disclosure tables for keyboard/screen-reader access. Range buttons have accessible names/pressed states; custom dates have labels and inline errors. Preserve the last loaded data with an error/retry notice on refresh failures. Loading charts reserve their height. Bound chart overflow locally and keep touch controls at least 44px. No fabricated percentage changes, sparkline samples, punitive streak wording or decorative charts.
+
+## Sprint 7A.2 — activity calendars
+
+Extend existing roadmap drill-downs with compact mastery/consistency indicators, a selected-roadmap trend and Monday-first monthly heatmap. Use saved roadmap accents. Habit activity has a selector, compact counters, monthly calendar, weekly trends, actual workout distribution and quantity/goal lines. Desktop uses two columns; below 850px stack content. Month selection stays within the Analytics date range.
+
+Cells are at least 44px tall, with full date/result accessible names, native keyboard controls, tooltips and announced selected-day details. Green means recorded goal met; red exceeded; solid amber explicitly below goal; dashed amber expected/unlogged; blue recorded without a goal or unscheduled study; patterned rest; neutral dashed future; muted unknown. Legends and text accompany colors. Quantity charts preserve zero, leave missing gaps and expose exact-value tables. No invented success or punitive streak language.

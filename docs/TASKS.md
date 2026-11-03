@@ -1,8 +1,47 @@
 # Development tasks
 
-Current phase: **Sprint 6.6 correction — roadmap-only recurrence and Study Anytime complete locally.**
+Current phase: **Sprint 7 — Milestone 7A.2 Learning and Habit Analytics complete locally.**
 
 User reports successful Ubuntu deployment and Mac/iPhone PWA installation (2026-10-28). Prior operational checklist items below remain historical agent verification limits, not a claim that deployment has not occurred.
+
+## Sprint 7 — incremental Analytics and Calendar work
+
+Full requirements: [SPRINT_7.md](SPRINT_7.md), refined by [SPRINT_7_RESUME.md](SPRINT_7_RESUME.md). This milestone does not claim completion of the full sprint.
+
+### 7A.1 — Analytics foundations
+
+- [x] Audit clean Git baseline and existing 79-test implementation before changes.
+- [x] Dedicated Analytics page in desktop navigation and mobile More menu.
+- [x] Shared validated Monday-start/local-date ranges, presets, previous/next and custom ranges up to 93 days.
+- [x] Saved study time, all tracked time, completed/required task counts and study-session cards.
+- [x] Daily study bars, grouped planned/recorded bars, eight-week trend and roadmap-color distributions.
+- [x] Roadmap selection reveals module durations and explicit current mastery with Learning links.
+- [x] Preserve archived attribution; exclude running time; split durations at local midnight/DST; distinguish missing comparison data.
+- [x] Reuse recurrence generation and occurrence identities; no parallel scheduling or time ledger.
+- [x] Nine regression tests added; 88 tests passing, lint, typecheck and production build.
+- [x] Final desktop/375px verification, responsive control fixes, formatting and documentation review.
+- [ ] Physical Safari/iPhone date-picker, VoiceOver and target-container release checks.
+
+### 7A.2 — Learning and Habit Analytics
+
+- [x] Preserve 7A.1 charts and extend the existing Analytics service.
+- [x] Roadmap monthly study heatmaps, saved-color trends, consistency and current mastery; reuse module totals and last studied.
+- [x] Habit monthly heatmaps, eligible-day adherence, period-bounded verified runs and weekly trends/quotas.
+- [x] Quantity/goal lines with explicit zero, missing gaps and separate historical units; actual workout distribution.
+- [x] Distinguish below-goal, unlogged, unscheduled, future, rest and unknown history.
+- [x] 98 automated tests, lint, typecheck, production build; desktop and 375px browser verification with isolated synthetic data.
+- [x] Formatting, documentation and preservation review.
+- [ ] Real iPhone Safari/VoiceOver and target-container/restored-copy release checks.
+
+### Remaining milestones — not started in this change
+
+- [ ] 7A.3: weekly summary and persisted Wins/Challenges/Next Week’s Priorities with history.
+- [ ] 7B.1: Monday-first desktop Month view, compact activity indicators, day selection and mobile month picker.
+- [ ] 7B.2: occurrence-only rescheduling improvements, Quick Add for generic/roadmap activities and safe desktop dragging if practical.
+- [ ] 7B.3: mobile polish and remaining calendar interactions.
+- [ ] Complete-sprint release review and separately authorized deployment/device checks.
+
+Next implementation task: 7A.3 Weekly Review and saved reflections. Do not begin it as part of 7A.2. Archive/rest history gaps and period-bounded runs are documented limitations, not inferred success.
 
 ## Sprint 6.6 correction — roadmap-only calendar sources (2026-10-31)
 

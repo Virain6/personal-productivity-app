@@ -13,6 +13,7 @@ import {
   PanelLeftOpen,
   Moon,
   MoreHorizontal,
+  ChartNoAxesCombined,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Dialog } from "./ui/dialog";
@@ -22,6 +23,7 @@ const links = [
   { href: "/projects", label: "Projects", icon: FolderKanban },
   { href: "/jobs", label: "Jobs", icon: BriefcaseBusiness },
   { href: "/habits", label: "Habits", icon: Heart },
+  { href: "/analytics", label: "Analytics", icon: ChartNoAxesCombined },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 export function AppShell({ children }: Readonly<{ children: ReactNode }>) {

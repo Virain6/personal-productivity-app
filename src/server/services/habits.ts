@@ -1,6 +1,6 @@
+import { expectedHabitDate } from "../../lib/activity-analytics";
 import { quickHabitRecord } from "../../lib/habit-quick";
 import { and, eq, desc, lte, gte } from "drizzle-orm";
-import { DateTime } from "luxon";
 import type { Store } from "../db/connection";
 import { habits, habitRevisions, habitRecords, settings } from "../db/schema";
 import type { HabitCommand } from "./habit-validation";
@@ -280,11 +280,7 @@ export function getHabits(
           ? revisions.find((r) => r.id === record.revisionId)
           : revisionFor(s, h.id, date);
         const cfg = rev?.config;
-        const expected =
-          !!cfg &&
-          (cfg.schedule === "daily" ||
-            (cfg.schedule === "weekdays" &&
-              cfg.weekdays.includes(DateTime.fromISO(date).weekday)));
+        const expected = !!cfg && expectedHabitDate(cfg, date);
         const weekSummary = summarizeHabitDays(
           Array.from({ length: 7 }, (_, i) => {
             const day = addDays(from, i);
@@ -298,13 +294,7 @@ export function getHabits(
               date: day,
               config: dayConfig,
               record: entry,
-              expected:
-                !!dayConfig &&
-                (dayConfig.schedule === "daily" ||
-                  (dayConfig.schedule === "weekdays" &&
-                    dayConfig.weekdays.includes(
-                      DateTime.fromISO(day).weekday,
-                    ))),
+              expected: !!dayConfig && expectedHabitDate(dayConfig, day),
             };
           }),
           today,
