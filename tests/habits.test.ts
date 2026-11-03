@@ -841,9 +841,9 @@ test("habit calendar derives one item per relevant date, preserves history, and 
       getHabitCalendar(s, date, date, tomorrow).days[0].habits[0].record?.state,
       "notDone",
     );
-    assert.throws(() => getHabitCalendar(s, date, "2026-11-02", now), /seven/);
-    assert.throws(() => getHabitCalendar(s, "2026-02-30", date, now), /seven/);
-    assert.throws(() => getHabitCalendar(s, date, "2026-10-25", now), /seven/);
+    assert.throws(() => getHabitCalendar(s, date, "2026-12-07", now), /42/);
+    assert.throws(() => getHabitCalendar(s, "2026-02-30", date, now), /42/);
+    assert.throws(() => getHabitCalendar(s, date, "2026-10-25", now), /42/);
   } finally {
     s.sqlite.close();
   }

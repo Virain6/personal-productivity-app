@@ -1,7 +1,19 @@
 # Progress
 
-Current phase: **Sprint 7A.3 — Weekly Review complete locally.**
+Current phase: **Sprint 7B.1 — Monthly Calendar complete locally.**
 Last verified: 2026-11-03. No commit, push, production access or deployment.
+
+## Sprint 7B.1 — Monthly Calendar (2026-11-03)
+
+Started from clean commit `0f7effa`, preserving completed Analytics and Weekly Review. Desktop Home now offers Day/Week/Month. Month uses a Monday-first 28–42-day grid, adjacent dates, current/selected day styling, month navigation and Today. Selecting a date opens the existing Day agenda; Month returns to the selected date's month. Mobile always remains Day, including when desktop Month is saved.
+
+Each date shows up to three compact activity previews with roadmap-saved color edges, status symbols, completed/skipped counts, habit indicators and a combined +N more count. Required past unfinished tasks are identified without marking future or optional tasks missed. Habits reuse historical goal/schedule rules, including explicit zero, archived logged history and future neutral indicators. No default study routines or separate calendar engine were added.
+
+The Home request key now includes both range endpoints, preventing stale week/month data when their starting Monday matches. Existing recurrence serves padded month ranges; the existing habit calendar read allows up to 42 days. Week summaries are not shown for a padded month range. No database schema, migration or dependency changes; migration head remains 0009 from 7A.3.
+
+Verification: 110 tests pass (106 existing plus four focused month integration/date tests), lint, typecheck, formatting and production build. Browser verified desktop Month, adjacent-month selection, completion/undo, task details and existing timer/manual-log controls, month navigation, Today and 375px mobile Day fallback with no horizontal overflow. Browser used an isolated synthetic database on port 3144, not personal or production data. Initial typecheck caught a view-type inference issue; it was fixed and checks rerun.
+
+Limits: full details/actions intentionally open Day; Month previews are not inline editors. Optional mobile month picker is deferred. Physical iPhone swipe and VoiceOver remain manual release checks; existing swipe handler is unchanged. Historical archive/rest uncertainty follows the existing services. 7B.1 is ready for local review; 7B.2/7B.3 remain unstarted. No commit, push, production connection or deployment.
 
 ## Sprint 7A.3 — Weekly Review (2026-11-03)
 

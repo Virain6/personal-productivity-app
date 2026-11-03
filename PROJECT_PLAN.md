@@ -12,7 +12,7 @@ Analytics uses saved session durations, explicit task statuses, historical habit
 
 Milestone 7A.2 adds learning/habit activity calendars, study consistency, current mastery and historical goal reporting over persisted records. Daily adherence and full-week quotas remain separate; missing data never implies success. Historical archive/rest gaps are disclosed. No analytics storage migration is needed.
 
-Milestone 7A.3 adds a focused Weekly Review under Analytics. Statistics remain derived from existing records; one versioned row per Monday week stores only Wins, Challenges and Next Week’s Priorities. These explicitly requested reflections do not introduce a standalone notes system. 7B remains pending.
+Milestone 7A.3 adds a focused Weekly Review under Analytics. Statistics remain derived from existing records; one versioned row per Monday week stores only Wins, Challenges and Next Week’s Priorities. These explicitly requested reflections do not introduce a standalone notes system. 7B.1 now adds the desktop monthly Home calendar, reusing existing occurrences and habit rules. 7B.2 rescheduling/Quick Add and 7B.3 mobile polish remain pending.
 
 ## Current Learning direction — Sprint 6.6 (2026-10-30)
 

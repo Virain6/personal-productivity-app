@@ -332,8 +332,8 @@ export function getHabitCalendar(
   to: string,
   now = Date.now(),
 ): HabitCalendarData {
-  if (!validDate(from) || !validDate(to) || to < from || to > addDays(from, 6))
-    throw new DomainError("Choose a calendar range of one to seven days.");
+  if (!validDate(from) || !validDate(to) || to < from || to > addDays(from, 41))
+    throw new DomainError("Choose a calendar range of one to 42 days.");
   return s.sqlite.transaction(() => {
     const days: HabitCalendarData["days"] = [];
     const first = getHabits(s, from, now);

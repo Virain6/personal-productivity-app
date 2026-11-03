@@ -99,3 +99,9 @@ Cells are at least 44px tall, with full date/result accessible names, native key
 Use a focused Analytics subpage with a quiet report header, clearly dated Monday–Sunday controls and three compact summary cards. Reuse the seven-day time chart and exact-value disclosure. Roadmap share bars use saved accents; task/habit progress is visually separate from recorded time. Keep the report to one chart and a compact roadmap/learning-activity panel. Future/no-data states use neutral explanatory text.
 
 Reflections are a single main panel beside a compact saved-week history on desktop; stack both and the report columns on mobile. Textareas use 16px type, visible labels, character limits and existing focus treatment. Saved/unsaved/saving and errors are explicit. Week-change confirmation reuses the existing focus-trapped Dialog with Keep editing or Change week, keep draft actions. No AI-generated filler, gamification or standalone notes feature.
+
+## Home Month view — Sprint 7B.1
+
+Desktop adds Month beside Day/Week. Use a Monday-first seven-column grid, quiet surface cells, restrained borders, muted adjacent dates, a selected-date outline and accent circle for Today. Show up to three single-line activity previews with saved roadmap-color edges, completion/skipped/past-unfinished symbols, compact status counts and +N more. Habit indicators retain goal outcomes; future habits show planned, not failed. Avoid bright full-cell fills.
+
+Every date is a keyboard-focusable button with its full date and activity counts; selecting it opens Day with existing details, timers and completion actions. Month returns to the selected date's month. Hover/focus remains visible. Mobile stays Day with existing touch navigation and no calendar mode toggle; an optional mobile month picker is deferred. Preview labels truncate, while hover titles and the Day agenda provide full text. Full iPhone/VoiceOver verification remains a manual release check.

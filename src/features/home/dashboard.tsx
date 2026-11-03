@@ -1,5 +1,11 @@
 "use client";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { MonthCalendar } from "./month-calendar";
+import {
+  calendarRange,
+  moveCalendar,
+  type CalendarView,
+} from "@/lib/month-calendar";
 import { DateTime } from "luxon";
 import {
   ChevronLeft,
@@ -36,17 +42,21 @@ function subscribeView(callback: () => void) {
     window.removeEventListener("planner:view", callback);
   };
 }
-function viewSnapshot(): "day" | "week" {
+function viewSnapshot(): CalendarView {
   if (!window.matchMedia("(min-width:768px)").matches) return "day";
   try {
     const saved = localStorage.getItem("planner.view.v1");
-    if (saved === "day" || saved === "week") return saved;
+    if (saved === "day" || saved === "week" || saved === "month") return saved;
   } catch {}
   return window.matchMedia("(min-width:1024px)").matches ? "week" : "day";
 }
 export function Dashboard() {
   const [date, setDate] = useState(() => localDate());
-  const view = useSyncExternalStore(subscribeView, viewSnapshot, () => "day");
+  const view = useSyncExternalStore<CalendarView>(
+    subscribeView,
+    viewSnapshot,
+    () => "day",
+  );
   const [loaded, setLoaded] = useState<{
     start: string;
     data: HomeData;
@@ -57,8 +67,8 @@ export function Dashboard() {
   const timer = useTimer();
   const [busy, setBusy] = useState(false);
   const [selected, setSelected] = useState<Task | null | undefined>(undefined);
-  const start = weekStart(date);
-  const end = addDays(start, 6);
+  const { from: start, to: end } = calendarRange(date, view);
+  const rangeKey = `${start}:${end}`;
   const habitCalendar = useHabitCalendar(start, end);
   const [habitTarget, setHabitTarget] = useState<{
     habit: HabitView;
@@ -66,7 +76,7 @@ export function Dashboard() {
     today: string;
   } | null>(null);
   const [habitSaved, setHabitSaved] = useState("");
-  const data = loaded?.start === start ? loaded.data : null;
+  const data = loaded?.start === rangeKey ? loaded.data : null;
   const loading = !data && !error;
   const touch = useRef<{ x: number; y: number } | null>(null);
   function reload() {
@@ -84,7 +94,7 @@ export function Dashboard() {
           controller.signal,
         );
         if (active && ticket === sequence) {
-          setLoaded({ start, data: result });
+          setLoaded({ start: rangeKey, data: result });
           setError("");
         }
       } catch (e) {
@@ -108,7 +118,7 @@ export function Dashboard() {
       window.removeEventListener("online", refreshEvent);
       window.removeEventListener("planner:changed", refreshEvent);
     };
-  }, [start, end]);
+  }, [start, end, rangeKey]);
   async function complete(task: Task, stopRunning = false) {
     if (!stopRunning && timer.running?.taskId === task.id) {
       setCompleteTarget(task);
@@ -132,16 +142,16 @@ export function Dashboard() {
       setBusy(false);
     }
   }
-  function changeView(v: "day" | "week") {
+  function changeView(v: CalendarView) {
     try {
       localStorage.setItem("planner.view.v1", v);
     } catch {}
     window.dispatchEvent(new Event("planner:view"));
   }
   function navigate(direction: number) {
-    setDate((d) => addDays(d, direction * (view === "week" ? 7 : 1)));
+    setDate((d) => moveCalendar(d, view, direction));
   }
-  const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
+  const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart(date), i));
   const today = data?.today ?? localDate();
   const selectedStats = data?.metrics.days.find((d) => d.date === date);
   function agenda(day: string) {
@@ -210,9 +220,11 @@ export function Dashboard() {
               <ChevronRight size={17} />
             </Button>
             <h2 className="min-w-36 text-sm font-medium">
-              {view === "week"
-                ? `${DateTime.fromISO(start).toFormat("MMM d")} – ${DateTime.fromISO(end).toFormat("MMM d, yyyy")}`
-                : DateTime.fromISO(date).toFormat("ccc, MMM d, yyyy")}
+              {view === "month"
+                ? DateTime.fromISO(date).toFormat("MMMM yyyy")
+                : view === "week"
+                  ? `${DateTime.fromISO(start).toFormat("MMM d")} – ${DateTime.fromISO(end).toFormat("MMM d, yyyy")}`
+                  : DateTime.fromISO(date).toFormat("ccc, MMM d, yyyy")}
             </h2>
             <Button onClick={() => setDate(today)}>Today</Button>
           </div>
@@ -222,7 +234,7 @@ export function Dashboard() {
               aria-label="Calendar view"
               className="hidden rounded-lg border border-border p-1 md:flex"
             >
-              {(["day", "week"] as const).map((v) => (
+              {(["day", "week", "month"] as const).map((v) => (
                 <button
                   key={v}
                   aria-pressed={view === v}
@@ -290,6 +302,18 @@ export function Dashboard() {
         ) : (
           data && (
             <>
+              {view === "month" && (
+                <MonthCalendar
+                  date={date}
+                  today={today}
+                  data={data}
+                  habits={habitCalendar.data}
+                  onOpenDay={(day) => {
+                    setDate(day);
+                    changeView("day");
+                  }}
+                />
+              )}
               <div className={view === "week" ? "hidden lg:block" : "hidden"}>
                 <div className="calendar gap-2">
                   {days.map((day) => (
@@ -316,7 +340,15 @@ export function Dashboard() {
                   ))}
                 </div>
               </div>
-              <div className={view === "week" ? "lg:hidden" : ""}>
+              <div
+                className={
+                  view === "month"
+                    ? "hidden"
+                    : view === "week"
+                      ? "lg:hidden"
+                      : ""
+                }
+              >
                 <div className="mb-2 grid grid-cols-7 gap-1">
                   {days.map((day) => (
                     <button
@@ -378,7 +410,7 @@ export function Dashboard() {
         )}
       </section>
 
-      {data && (
+      {data && view !== "month" && (
         <section
           aria-label="This week at a glance"
           className="mt-4 border-t border-border pt-3"

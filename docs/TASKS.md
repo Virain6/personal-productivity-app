@@ -1,6 +1,6 @@
 # Development tasks
 
-Current phase: **Sprint 7 — Milestone 7A.3 Weekly Review complete locally.**
+Current phase: **Sprint 7 — Milestone 7B.1 Monthly Calendar complete locally.**
 
 User reports successful Ubuntu deployment and Mac/iPhone PWA installation (2026-10-28). Prior operational checklist items below remain historical agent verification limits, not a claim that deployment has not occurred.
 
@@ -44,14 +44,24 @@ Full requirements: [SPRINT_7.md](SPRINT_7.md), refined by [SPRINT_7_RESUME.md](S
 - [x] 106 tests, lint, typecheck, formatting, production build, desktop and 375px browser verification.
 - [ ] Real Safari/iPhone reload/close confirmation, VoiceOver and target-container/restored-copy release checks.
 
+### 7B.1 — Monthly Calendar
+
+- [x] Monday-first desktop Month grid, adjacent dates, Today and month navigation.
+- [x] Preserve selected dates across Day/Week/Month; date cells open existing Day actions.
+- [x] Real roadmap/one-off/generic occurrences with saved roadmap colors, completed/skipped/past unfinished states and overflow counts.
+- [x] Habit indicators reuse dated goal/schedule rules; explicit zero retained, future indicators neutral.
+- [x] Reuse occurrence engine and extend existing habit range to 42 days; no schema or dependency changes.
+- [x] 110 tests, lint, typecheck, formatting and production build; desktop and 375px browser verification on synthetic data.
+- [x] Mobile stays Day; existing navigation and swipe handler preserved.
+- [ ] Physical iPhone swipe/VoiceOver verification before release. Optional mobile month picker deferred to mobile polish.
+
 ### Remaining milestones — not started in this change
 
-- [ ] 7B.1: Monday-first desktop Month view, compact activity indicators, day selection and mobile month picker.
 - [ ] 7B.2: occurrence-only rescheduling improvements, Quick Add for generic/roadmap activities and safe desktop dragging if practical.
 - [ ] 7B.3: mobile polish and remaining calendar interactions.
 - [ ] Complete-sprint release review and separately authorized deployment/device checks.
 
-Next milestone: 7B.1 Month view, only when requested. No 7B implementation was started during 7A.3. Existing archive/rest history limitations remain unchanged.
+Next milestone: 7B.2 rescheduling and Quick Add, only when requested. 7B.2 and 7B.3 were not started. Existing archive/rest history limitations remain unchanged.
 
 ## Sprint 6.6 correction — roadmap-only calendar sources (2026-10-31)
 
