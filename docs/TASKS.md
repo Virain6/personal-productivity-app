@@ -1,6 +1,6 @@
 # Development tasks
 
-Current phase: **Sprint 7 — Milestone 7B.1 Monthly Calendar complete locally.**
+Current phase: **Sprint 7 complete locally through 7B.3; ready for release review with manual gates below.**
 
 User reports successful Ubuntu deployment and Mac/iPhone PWA installation (2026-10-28). Prior operational checklist items below remain historical agent verification limits, not a claim that deployment has not occurred.
 
@@ -55,13 +55,35 @@ Full requirements: [SPRINT_7.md](SPRINT_7.md), refined by [SPRINT_7_RESUME.md](S
 - [x] Mobile stays Day; existing navigation and swipe handler preserved.
 - [ ] Physical iPhone swipe/VoiceOver verification before release. Optional mobile month picker deferred to mobile polish.
 
-### Remaining milestones — not started in this change
+### 7B.2 — Quick Add and Rescheduling
 
-- [ ] 7B.2: occurrence-only rescheduling improvements, Quick Add for generic/roadmap activities and safe desktop dragging if practical.
-- [ ] 7B.3: mobile polish and remaining calendar interactions.
-- [ ] Complete-sprint release review and separately authorized deployment/device checks.
+- [x] Visible Home Quick Add with selected-date defaults, one-off general tasks, weekly general tasks and existing-roadmap study activities.
+- [x] Optional description/time/duration, roadmap-saved name/color and optional module/step selection; explicit additional-study choice and existing open-activity reuse.
+- [x] Focused Move to Date confirmation for one occurrence, preserving identity, status, history and running timers.
+- [x] Separate future general schedule editor with an effective date; roadmap schedules stay in their existing roadmap editor.
+- [x] Dated general-template revisions reuse existing recurrence generation; preserve all past and protected future exceptions.
+- [x] Additive migration 0010 and isolated upgrade from 0009, preserving existing records.
+- [x] 118 tests, lint, typecheck, formatting, production build; desktop and 375px browser creation/move/schedule verification.
+- [x] Save feedback, validation/conflict errors, double-submit guards, Quick Add/schedule discard confirmation and responsive dialogs.
+- [ ] Drag-and-drop deliberately deferred: confirmed dialog-based moves provide the reliable keyboard/touch path.
+- [ ] Physical Safari/iPhone/VoiceOver and target-container release checks.
 
-Next milestone: 7B.2 rescheduling and Quick Add, only when requested. 7B.2 and 7B.3 were not started. Existing archive/rest history limitations remain unchanged.
+### 7B.3 — Mobile Calendar Polish
+
+- [x] Retain mobile Day and desktop Day/Week/Month; compact date picker trigger, Today and button alternatives.
+- [x] Tab-local selected date survives page navigation/reload; validated recovery, no server data stored in browser preferences.
+- [x] Agenda swipes reject controls, vertical intent, multi-touch, cancellation, short movement and long holds.
+- [x] Monday-first compact month picker with adjacent dates, month controls, Today/selected states and existing roadmap-colored activity indicators.
+- [x] Calendar dialogs fit the visual viewport, use 16px mobile fields and retain a sticky title/close control; existing Radix focus trapping and reduced-motion rules retained.
+- [x] Task completion/undo, shortcut to existing timer/manual logs, separate occurrence/future controls and unsaved task/move dismissal protection.
+- [x] Use refreshed task versions for status/move after timer changes; preserve optimistic checks for edited fields.
+- [x] 123 tests, lint, typecheck, formatting and production build; desktop, actual 375px and 320px browser checks.
+- [x] Review Analytics/Weekly Review and Day/Week/Month coexistence; rehearse 0009/0010 on an isolated populated 0008 copy, preserving 19 existing tables.
+- [x] Compose configuration validates; Dockerfile/standalone packaging reviewed, no dependencies or new migration in 7B.3.
+- [ ] Physical iPhone Safari/PWA swipe, keyboard, safe areas, VoiceOver and two-device checks.
+- [ ] Target Docker image build, container restart/persistence and rehearsal on a separately authorized restored production backup (local daemon unavailable).
+
+Next: release review and the outstanding device/container gates. No automatic deployment. General recurrence remains one weekday per weekly activity; multi-day/complex recurrence and drag-and-drop remain deferred. Existing archive/rest history limitations remain unchanged.
 
 ## Sprint 6.6 correction — roadmap-only calendar sources (2026-10-31)
 

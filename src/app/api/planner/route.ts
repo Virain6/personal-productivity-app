@@ -1,3 +1,4 @@
+import { getGeneralSchedule } from "@/server/services/general-schedules";
 import { getWeeklyReview } from "@/server/services/weekly-reviews";
 import { getAnalytics } from "@/server/services/analytics";
 import { getModuleActivity } from "@/server/services/module-activity";
@@ -42,6 +43,11 @@ export async function GET(request: Request) {
     guardRequest(request);
     const url = new URL(request.url);
     const store = getStore();
+    if (url.searchParams.get("view") === "generalSchedule")
+      return Response.json(
+        getGeneralSchedule(store, url.searchParams.get("id") ?? ""),
+        { headers: { "Cache-Control": "no-store" } },
+      );
     if (url.searchParams.get("view") === "weeklyReview")
       return Response.json(
         getWeeklyReview(store, url.searchParams.get("week") ?? undefined),

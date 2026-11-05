@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import { DateTime } from "luxon";
 import { categories, type Task } from "@/lib/planner-types";
 import { formatDuration, localOptions } from "@/lib/dates";
@@ -15,6 +15,9 @@ export function TaskDialog({
   onClose,
   children,
   liveTask,
+  onMove,
+  onSchedule,
+  onComplete,
 }: {
   task: Task | null;
   date: string;
@@ -22,8 +25,19 @@ export function TaskDialog({
   onClose: () => void;
   children?: ReactNode;
   liveTask?: Task;
+  onMove?: () => void;
+  onSchedule?: () => void;
+  onComplete?: () => void;
 }) {
   const timer = useTimer();
+  const timeSection = useRef<HTMLDivElement>(null);
+  const [dirty, setDirty] = useState(false);
+  const [leave, setLeave] = useState<(() => void) | null>(null);
+  function requestLeave(action: () => void) {
+    if (busy) return;
+    if (dirty) setLeave(() => action);
+    else action();
+  }
   const [confirmStop, setConfirmStop] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -84,7 +98,7 @@ export function TaskDialog({
       await sendCommand({
         action: "status",
         id: task!.id,
-        version: task!.version,
+        version: (liveTask ?? task)!.version,
         status: value,
         stopRunning,
       });
@@ -97,9 +111,10 @@ export function TaskDialog({
   }
   return (
     <Dialog
+      layout="calendar"
       open
       onOpenChange={(open) => {
-        if (!open && !busy) onClose();
+        if (!open) requestLeave(onClose);
       }}
       title={task ? "Activity details" : "Add an activity"}
       description={
@@ -108,7 +123,84 @@ export function TaskDialog({
           : "Make space for something you want to do."
       }
     >
-      <form onSubmit={save} className="space-y-4">
+      {leave && (
+        <div
+          role="alert"
+          className="mb-4 rounded-lg border border-warning/40 p-3"
+        >
+          <p className="mb-2">Discard unsaved activity changes?</p>
+          <Button onClick={() => setLeave(null)}>Keep editing</Button>
+          <Button
+            variant="danger"
+            onClick={() => {
+              const action = leave;
+              setLeave(null);
+              setDirty(false);
+              action();
+            }}
+          >
+            Discard changes
+          </Button>
+        </div>
+      )}
+      {task && (
+        <div className="mb-4 flex flex-wrap gap-2">
+          <Button
+            onClick={() => {
+              timeSection.current?.scrollIntoView({ block: "start" });
+              timeSection.current?.focus();
+            }}
+          >
+            Timer &amp; time logs
+          </Button>
+          <Button
+            disabled={busy || task.status === "skipped"}
+            onClick={() => {
+              if (onComplete) requestLeave(onComplete);
+            }}
+          >
+            {task.status === "done" ? "Undo completion" : "Complete activity"}
+          </Button>
+          <Button
+            onClick={() => {
+              if (onMove) requestLeave(onMove);
+            }}
+          >
+            Move to Date
+          </Button>
+          {task.templateId &&
+            (task.studyRoadmap ? (
+              <Link
+                href={`/learning/${task.studyRoadmap.id}`}
+                onClick={(event) => {
+                  if (
+                    dirty &&
+                    !window.confirm(
+                      "Discard unsaved activity changes and open the roadmap?",
+                    )
+                  )
+                    event.preventDefault();
+                }}
+                className="inline-flex min-h-11 items-center text-sm text-accent-hover underline"
+              >
+                Edit future schedule in roadmap
+              </Link>
+            ) : ["Other", "Project", "Applications"].includes(task.category) ? (
+              <Button
+                onClick={() => {
+                  if (onSchedule) requestLeave(onSchedule);
+                }}
+              >
+                Edit future recurring schedule
+              </Button>
+            ) : null)}
+        </div>
+      )}
+      <form
+        onSubmit={save}
+        onChange={() => setDirty(true)}
+        className="space-y-4"
+      >
         <label>
           Activity
           <input
@@ -125,6 +217,15 @@ export function TaskDialog({
               <Link
                 className="inline-flex min-h-11 items-center text-accent-hover"
                 href={`/learning/${task.studyRoadmap.id}`}
+                onClick={(event) => {
+                  if (
+                    dirty &&
+                    !window.confirm(
+                      "Discard unsaved activity changes and open the roadmap?",
+                    )
+                  )
+                    event.preventDefault();
+                }}
               >
                 {task.studyRoadmap.title}
               </Link>
@@ -267,7 +368,11 @@ export function TaskDialog({
               disabled={busy}
               variant="ghost"
               onClick={() =>
-                status(task.status === "skipped" ? "pending" : "skipped")
+                requestLeave(() => {
+                  void status(
+                    task.status === "skipped" ? "pending" : "skipped",
+                  );
+                })
               }
             >
               {task.status === "skipped"
@@ -281,7 +386,13 @@ export function TaskDialog({
         </div>
       </form>
       {children && (
-        <div className="mt-6 border-t border-border pt-5">{children}</div>
+        <div
+          ref={timeSection}
+          tabIndex={-1}
+          className="mt-6 border-t border-border pt-5"
+        >
+          {children}
+        </div>
       )}
     </Dialog>
   );

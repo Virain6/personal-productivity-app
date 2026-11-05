@@ -1,5 +1,17 @@
 "use client";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCalendarDate } from "./use-calendar-date";
+import { MonthPicker } from "./month-picker";
+import {
+  beginSwipe,
+  trackSwipe,
+  finishSwipe,
+  swipeControlSelector,
+  type Swipe,
+} from "@/lib/calendar-navigation";
+import { QuickAdd } from "./quick-add";
+import { MoveDialog } from "./move-dialog";
+import { GeneralScheduleDialog } from "./general-schedule-dialog";
 import { MonthCalendar } from "./month-calendar";
 import {
   calendarRange,
@@ -51,7 +63,8 @@ function viewSnapshot(): CalendarView {
   return window.matchMedia("(min-width:1024px)").matches ? "week" : "day";
 }
 export function Dashboard() {
-  const [date, setDate] = useState(() => localDate());
+  const [date, setDate] = useCalendarDate();
+  const [monthPicker, setMonthPicker] = useState(false);
   const view = useSyncExternalStore<CalendarView>(
     subscribeView,
     viewSnapshot,
@@ -66,6 +79,10 @@ export function Dashboard() {
   const [completeTarget, setCompleteTarget] = useState<Task | null>(null);
   const timer = useTimer();
   const [busy, setBusy] = useState(false);
+  const [quickAdd, setQuickAdd] = useState(false);
+  const [moveTarget, setMoveTarget] = useState<Task | null>(null);
+  const [scheduleTarget, setScheduleTarget] = useState<string | null>(null);
+  const [notice, setNotice] = useState("");
   const [selected, setSelected] = useState<Task | null | undefined>(undefined);
   const { from: start, to: end } = calendarRange(date, view);
   const rangeKey = `${start}:${end}`;
@@ -78,7 +95,7 @@ export function Dashboard() {
   const [habitSaved, setHabitSaved] = useState("");
   const data = loaded?.start === rangeKey ? loaded.data : null;
   const loading = !data && !error;
-  const touch = useRef<{ x: number; y: number } | null>(null);
+  const touch = useRef<Swipe | null>(null);
   function reload() {
     window.dispatchEvent(new Event("planner:changed"));
   }
@@ -204,7 +221,7 @@ export function Dashboard() {
       <h1 className="sr-only">Home calendar</h1>
       <section aria-label="Planner">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex w-full items-center gap-1 md:w-auto md:flex-wrap md:gap-2">
             <Button
               variant="ghost"
               onClick={() => navigate(-1)}
@@ -219,14 +236,30 @@ export function Dashboard() {
             >
               <ChevronRight size={17} />
             </Button>
-            <h2 className="min-w-36 text-sm font-medium">
+            <Button
+              className="min-w-0 flex-1 px-1 md:hidden"
+              variant="ghost"
+              aria-label="Choose calendar date"
+              aria-haspopup="dialog"
+              onClick={() => setMonthPicker(true)}
+            >
+              <CalendarDays size={16} className="shrink-0" />
+              <span aria-live="polite">
+                {DateTime.fromISO(date).toFormat("MMM d, yyyy")}
+              </span>
+            </Button>
+            <h2 className="hidden min-w-36 text-sm font-medium md:block">
               {view === "month"
                 ? DateTime.fromISO(date).toFormat("MMMM yyyy")
                 : view === "week"
                   ? `${DateTime.fromISO(start).toFormat("MMM d")} – ${DateTime.fromISO(end).toFormat("MMM d, yyyy")}`
                   : DateTime.fromISO(date).toFormat("ccc, MMM d, yyyy")}
             </h2>
-            <Button onClick={() => setDate(today)}>Today</Button>
+            <Button
+              onClick={() => setDate(localDate(Date.now(), data?.timezone))}
+            >
+              Today
+            </Button>
           </div>
           <div className="flex gap-3">
             <div
@@ -247,13 +280,21 @@ export function Dashboard() {
             </div>
             <Button
               variant="primary"
-              onClick={() => setSelected(null)}
+              onClick={() => setQuickAdd(true)}
+              aria-label="Quick Add"
               disabled={!data}
             >
-              <Plus size={32} strokeWidth={3} />
+              <Plus size={20} strokeWidth={2} />
+              <span>Quick Add</span>
             </Button>
           </div>
         </div>
+        {notice && (
+          <p role="status" className="my-3 text-sm text-success">
+            {notice}
+          </p>
+        )}
+
         <div className="mb-2 flex items-center gap-2 text-xs text-muted">
           <CalendarDays size={14} />
           <span>{data?.timezone ?? "America/Toronto"}</span>
@@ -378,28 +419,45 @@ export function Dashboard() {
                   onTouchCancel={() => {
                     touch.current = null;
                   }}
+                  aria-label="Daily activities"
                   onTouchStart={(event) => {
-                    touch.current = null;
-                    if (
-                      (event.target as HTMLElement).closest(
-                        "button,a,input,select,textarea",
-                      )
-                    )
-                      return;
-                    touch.current = {
-                      x: event.touches[0].clientX,
-                      y: event.touches[0].clientY,
-                    };
+                    const point = event.touches[0];
+                    touch.current = point
+                      ? beginSwipe(
+                          point.clientX,
+                          point.clientY,
+                          event.timeStamp,
+                          event.touches.length,
+                          !!(event.target as HTMLElement).closest(
+                            swipeControlSelector,
+                          ),
+                        )
+                      : null;
+                  }}
+                  onTouchMove={(event) => {
+                    const point = event.touches[0];
+                    touch.current = point
+                      ? trackSwipe(
+                          touch.current,
+                          point.clientX,
+                          point.clientY,
+                          event.touches.length,
+                        )
+                      : null;
                   }}
                   onTouchEnd={(event) => {
-                    if (!touch.current) return;
-                    const dx =
-                      event.changedTouches[0].clientX - touch.current.x;
-                    const dy =
-                      event.changedTouches[0].clientY - touch.current.y;
+                    const point = event.changedTouches[0];
+                    const direction =
+                      point && !event.touches.length
+                        ? finishSwipe(
+                            touch.current,
+                            point.clientX,
+                            point.clientY,
+                            event.timeStamp,
+                          )
+                        : 0;
                     touch.current = null;
-                    if (Math.abs(dx) > 65 && Math.abs(dx) > Math.abs(dy) * 1.5)
-                      setDate((d) => addDays(d, dx < 0 ? 1 : -1));
+                    if (direction) setDate((d) => addDays(d, direction));
                   }}
                 >
                   {agenda(date)}
@@ -508,10 +566,65 @@ export function Dashboard() {
           Stop timer and complete
         </Button>
       </Dialog>
+      {monthPicker && (
+        <MonthPicker
+          date={date}
+          today={today}
+          onClose={() => setMonthPicker(false)}
+          onSelect={(day) => {
+            setDate(day);
+            setMonthPicker(false);
+          }}
+        />
+      )}
+      {quickAdd && (
+        <QuickAdd
+          date={date}
+          onClose={() => setQuickAdd(false)}
+          onSaved={setNotice}
+        />
+      )}
+      {moveTarget && (
+        <MoveDialog
+          task={moveTarget}
+          timezone={data?.timezone ?? "America/Toronto"}
+          onClose={() => setMoveTarget(null)}
+          onSaved={setNotice}
+        />
+      )}
+      {scheduleTarget && (
+        <GeneralScheduleDialog
+          id={scheduleTarget}
+          onClose={() => setScheduleTarget(null)}
+          onSaved={setNotice}
+        />
+      )}
       {selected !== undefined && (
         <TaskDialog
           key={selected?.id ?? "new"}
           task={selected}
+          onComplete={() => {
+            if (selected) {
+              setSelected(undefined);
+              void complete(
+                data?.tasks.find((t) => t.id === selected.id) ?? selected,
+              );
+            }
+          }}
+          onMove={() => {
+            if (selected) {
+              setMoveTarget(
+                data?.tasks.find((t) => t.id === selected.id) ?? selected,
+              );
+              setSelected(undefined);
+            }
+          }}
+          onSchedule={() => {
+            if (selected?.templateId) {
+              setScheduleTarget(selected.templateId);
+              setSelected(undefined);
+            }
+          }}
           liveTask={data?.tasks.find((t) => t.id === selected?.id)}
           date={date}
           timezone={data?.timezone ?? "America/Toronto"}

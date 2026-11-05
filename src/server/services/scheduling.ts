@@ -1,3 +1,4 @@
+import { templateConfig } from "./general-schedules";
 import { scheduleContext, applyStudyOccurrence } from "./study-schedules";
 import { eq } from "drizzle-orm";
 import { DateTime } from "luxon";
@@ -81,8 +82,9 @@ export function ensureOccurrences(
         if (date < config.onboardingDate) continue;
         const weekday = DateTime.fromISO(date, { zone: "UTC" }).weekday;
         for (const template of active) {
+          const general = templateConfig(store, template, date);
           if (
-            template.weekday !== weekday ||
+            general.weekday !== weekday ||
             date < template.effectiveFrom ||
             (template.effectiveUntil && date > template.effectiveUntil)
           )
@@ -96,13 +98,12 @@ export function ensureOccurrences(
               templateId: template.id,
               occurrenceDate: date,
               plannedDate: date,
-              title: context?.title ?? template.title,
+              title: context?.title ?? general.title,
               category: template.category,
-              suggestedTime: context
-                ? context.config.time
-                : template.suggestedTime,
-              targetMinutes: context?.config.minutes ?? template.targetMinutes,
-              optional: template.optional,
+              suggestedTime: context ? context.config.time : general.time,
+              targetMinutes: context?.config.minutes ?? general.minutes,
+              optional: general.optional,
+              summary: context ? "" : general.summary,
               createdAt: now,
               updatedAt: now,
             })

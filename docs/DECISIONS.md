@@ -115,3 +115,13 @@ Derive 7A.2 from existing records and historical habit rules without schema chan
 ## 2026-11-03 — Weekly Review stores reflections, not statistical snapshots
 
 Reuse Analytics over Monday–Sunday ranges and persist only the three expressly authorized reflection fields. Dynamic statistics reflect later corrections. One primary-key week plus optimistic versions and existing retry receipts protects edits. Keep browser-session recovery drafts distinct from server-saved reviews; no automatic empty records or offline mutation queue. Limit each reflection field to 3000 characters. Stop after verified 7A.3; 7B requires a later request.
+
+## 2026-11-04 — scoped general recurrence revisions and confirmed moves
+
+Use the existing weekly template/date engine for general recurring tasks, with a small additive dated-configuration table. Keep stable template IDs; regenerate only untouched future projections when a revision changes. Preserve all meaningful exceptions and historical rows. This follows the plan's history-preservation contract without replacing the established roadmap schedule system. General recurrence begins with one weekday per activity; do not introduce complex RRULEs or default learning schedules.
+
+Prefer a focused, confirmed occurrence-only Move to Date action over drag-and-drop for this milestone. It offers the same safe path on desktop, keyboard and iPhone. Keep future roadmap edits in Learning and general future edits explicitly separate from single-occurrence moves. No automatic deployment or production migration.
+
+## 2026-11-05 — retain mobile date without a second calendar model
+
+Use a versioned, tab-local date preference, not a new persisted calendar entity or cross-device selection. Month picker reads existing Home occurrences and uses the same Monday grid; selecting closes to Day. A small gesture state machine cancels scrolling/multi-touch/control gestures instead of introducing a gesture dependency. Calendar-only dialog sizing uses visualViewport with CSS fallback. Keep task edits and confirmed moves distinct; explicit draft discard precedes switching actions. No new schema or service required. Physical touch/keyboard/VoiceOver validation remains a release gate.

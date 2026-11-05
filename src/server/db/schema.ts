@@ -355,3 +355,21 @@ export const weeklyReviews = sqliteTable(
     check("review_version", sql`${t.version}>0`),
   ],
 );
+
+// General recurrence uses the existing template/date engine. Revisions apply only
+// from an explicit date; existing templates are the historical baseline.
+export const generalTemplateVersions = sqliteTable(
+  "general_template_versions",
+  {
+    id: text("id").primaryKey(),
+    templateId: text("template_id")
+      .notNull()
+      .references(() => templates.id),
+    version: integer("version").notNull(),
+    effectiveFrom: text("effective_from").notNull(),
+    config: text("config", { mode: "json" })
+      .$type<import("../../lib/general-schedule").GeneralScheduleConfig>()
+      .notNull(),
+  },
+  (t) => [uniqueIndex("general_template_version").on(t.templateId, t.version)],
+);

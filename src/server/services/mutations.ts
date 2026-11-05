@@ -1,3 +1,4 @@
+import { saveGeneralSchedule } from "./general-schedules";
 import { saveWeeklyReview } from "./weekly-reviews";
 import { mutateStudySchedule } from "./study-schedules";
 import { linkNewSession, setTaskTopic, setSessionTopic } from "./study-links";
@@ -7,7 +8,7 @@ import { eq } from "drizzle-orm";
 import type { Store } from "../db/connection";
 import { receipts, settings } from "../db/schema";
 import { mutation, DomainError } from "./validation";
-import { saveTask, setStatus } from "./tasks";
+import { saveTask, setStatus, moveTask } from "./tasks";
 import {
   startTimer,
   stopTimer,
@@ -36,7 +37,12 @@ export function mutate(store: Store, input: unknown, now = Date.now()) {
       const c = parsed.command;
       const timezone = store.db.select().from(settings).get()!.timezone;
       let id: string | undefined;
-      if (c.action === "weeklyReviewSave") id = saveWeeklyReview(store, c, now);
+      if (c.action === "generalScheduleSave")
+        id = saveGeneralSchedule(store, c, now);
+      else if (c.action === "moveTask")
+        id = moveTask(store, c.id, c.version, c.date, c.time, now, timezone);
+      else if (c.action === "weeklyReviewSave")
+        id = saveWeeklyReview(store, c, now);
       else if (c.action === "roadmapCreate" || c.action === "roadmapChange")
         id = mutateLearning(store, c, now);
       else if (c.action === "studyScheduleSave" || c.action === "studyTask")

@@ -71,6 +71,13 @@
       "when": 1793720746782,
       "tag": "0009_volatile_falcon",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1793807331718,
+      "tag": "0010_small_wrecking_crew",
+      "breakpoints": true
     }
   ]
 }

@@ -188,7 +188,7 @@ test("roadmap creates and changes are receipt-safe", () => {
     s.sqlite.close();
   }
 });
-for (const oldCount of [3, 4, 5, 6, 7, 8, 9])
+for (const oldCount of [3, 4, 5, 6, 7, 8, 9, 10])
   test(`additive migration preserves existing data from ${oldCount} migrations`, () => {
     const root = mkdtempSync(join(tmpdir(), "planner-learning-upgrade-")),
       folder = join(root, "old");
@@ -226,6 +226,10 @@ for (const oldCount of [3, 4, 5, 6, 7, 8, 9])
         );
       if (oldCount >= 7)
         db.exec("UPDATE session_learning SET section_id='old-section'");
+      if (oldCount >= 10)
+        db.exec(
+          "INSERT INTO weekly_reviews(week,wins,updated_at) VALUES('2026-10-26','Retain reflection',1)",
+        );
       const tables = (
         db
           .prepare(

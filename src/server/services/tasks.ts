@@ -8,6 +8,7 @@ import {
   taskStudy,
   retiredStudyTasks,
 } from "../db/schema";
+import { localOptions } from "../../lib/dates";
 import { DomainError, taskFields } from "./validation";
 import type { z } from "zod";
 export function requireTask(store: Store, id: string, version?: number) {
@@ -120,4 +121,48 @@ export function setStatus(
     .set({ status, version: task.version + 1, updatedAt: now })
     .where(eq(tasks.id, id))
     .run();
+}
+
+export function moveTask(
+  store: Store,
+  id: string,
+  version: number,
+  date: string,
+  time: string | null,
+  now: number,
+  zone: string,
+) {
+  const old = requireTask(store, id, version);
+  let fixedStart = old.fixedStart,
+    fixedEnd = old.fixedEnd;
+  if (old.mode === "fixed") {
+    const clock =
+      time ?? DateTime.fromMillis(old.fixedStart!, { zone }).toFormat("HH:mm");
+    const candidates = localOptions(`${date}T${clock}`, zone);
+    if (candidates.length !== 1)
+      throw new DomainError(
+        "Choose an unambiguous valid start time; daylight-saving repeated or missing times cannot be moved here.",
+      );
+    fixedStart = candidates[0].value;
+    fixedEnd = fixedStart + (old.fixedEnd! - old.fixedStart!);
+  }
+  return saveTask(
+    store,
+    {
+      title: old.title,
+      category: old.category,
+      plannedDate: date,
+      mode: old.mode,
+      suggestedTime: old.mode === "flexible" ? time : null,
+      targetMinutes: old.targetMinutes,
+      fixedStart,
+      fixedEnd,
+      optional: old.optional,
+      summary: old.summary,
+    },
+    now,
+    zone,
+    id,
+    version,
+  );
 }

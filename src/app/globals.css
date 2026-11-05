@@ -114,3 +114,44 @@ label > textarea {
     scroll-behavior: auto !important;
   }
 }
+
+/* Calendar editors use the visible viewport, including a software keyboard. */
+.calendar-dialog {
+  top: var(--dialog-top, 50%);
+  max-height: var(--dialog-height, 90dvh);
+  overscroll-behavior: contain;
+  scroll-padding-block: 16px;
+}
+@media (max-width: 767px) {
+  .calendar-dialog {
+    width: calc(100% - 1rem);
+    padding: 12px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+  .calendar-dialog input:not([type="checkbox"]),
+  .calendar-dialog select,
+  .calendar-dialog textarea {
+    font-size: 16px;
+    min-width: 0;
+    scroll-margin-block: 16px;
+  }
+  .calendar-dialog label {
+    min-width: 0;
+  }
+}
+
+.calendar-dialog-heading {
+  position: sticky;
+  top: -20px;
+  z-index: 1;
+  margin: -20px -20px 0;
+  padding: 20px 20px 1px;
+  background: var(--surface);
+}
+@media (max-width: 767px) {
+  .calendar-dialog-heading {
+    top: -12px;
+    margin: -12px -12px 0;
+    padding: 12px 12px 1px;
+  }
+}

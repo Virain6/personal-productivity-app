@@ -1,3 +1,4 @@
+import { calendarCommand } from "./calendar-validation";
 import { isReviewWeek } from "../../lib/weekly-review";
 import { studyScheduleCommand } from "./study-schedule-validation";
 import { learningCommand } from "./learning-validation";
@@ -124,6 +125,7 @@ export const mutation = z.object({
         priorities: z.string().max(3000),
       })
       .strict(),
+    ...calendarCommand.options,
     ...command.options,
     ...habitCommand.options,
     ...learningCommand.options,
