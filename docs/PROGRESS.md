@@ -1,7 +1,17 @@
 # Progress
 
-Current phase: **Sprint 7B.3 complete locally; Sprint 7 ready for release review with manual gates.**
+Current phase: **Sprint 7 deployed (user reported); CI/CD preparation verified locally, awaiting manual GitHub/Ubuntu setup.**
 Last verified: 2026-11-05. No commit, push, production access or deployment.
+
+## Sprint 7 release — CI/CD preparation (2026-11-05)
+
+Started from clean `82cb9ea`, preserving all completed Home, Learning, Habits and Analytics functionality. Added `.github/workflows/ci.yml`, `deploy/planner-deploy.py`, systemd service/timer definitions, isolated Python controller tests invoked by `npm test`, and [CI_CD.md](CI_CD.md). CI runs locked installation and the existing tests/lint/typecheck/format/build scripts under Node 22; one stable `Planner verification` job supports required checks. No production secrets or deployment access are available to the hosted runner.
+
+The server-initiated controller locks, verifies clean main/recorded image/mounts/environment, fetches with an explicit ancestry check, and requires successful push CI plus a matching merged PR for the exact target. It builds a detached worktree before downtime, retains the previous image, verifies a backup before stopping Planner and another after stopping, fast-forwards the checkout, reuses the backup-aware migrator, and verifies container/HTTP health before recording success. A persisted pending record blocks retries after interruption/migration/health failure; failed startup attempts stop only Planner, with no automatic schema-unsafe image rollback. Changes to Compose infrastructure or tracked runtime paths require manual intervention. Existing `.env`, data and backups are not overwritten.
+
+The systemd timer is supplied but not installed/enabled. Credentials and initial baseline adoption are explicit operator steps. Documentation explains fine-grained read-only API access, read-only deploy key, branch-protection plan limitations, controlled Docker identity/root-equivalent privilege, check-only and no-change checks, snapshot-compatible restore and manual recovery/re-adoption. No automatic cleanup; retained worktrees/images/backups require operator-managed disk space.
+
+Verification: **124/124 repository tests pass**, including 16 Python controller scenarios with no Docker/GitHub/server access. Lint, typecheck, formatting and production build pass. New tests cover CI/PR gates, actual temporary Git dirty/wrong-branch handling, locking, no-change/check-only, backup verification, mount matching, safe operation ordering and migration/health failure latches. An initial temporary Git test exposed macOS symlink spelling differences; canonical path comparison fixed that failure. The local Docker daemon is unavailable, so no live container rollout or systemd test is claimed. Actual GitHub workflow/protection, Ubuntu systemd/Docker/credential behavior and a controlled restored-copy rollout remain manual acceptance gates. No application schema migration or runtime dependencies added, and no production connection, commit, push, merge or deployment performed.
 
 ## Sprint 7B.3 — Mobile Calendar Polish (2026-11-05)
 

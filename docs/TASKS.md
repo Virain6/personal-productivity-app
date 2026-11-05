@@ -1,8 +1,21 @@
 # Development tasks
 
-Current phase: **Sprint 7 complete locally through 7B.3; ready for release review with manual gates below.**
+Current phase: **Sprint 7 deployed (user reported); CI/CD release workflow prepared locally, awaiting manual GitHub/Ubuntu setup.**
 
 User reports successful Ubuntu deployment and Mac/iPhone PWA installation (2026-10-28). Prior operational checklist items below remain historical agent verification limits, not a claim that deployment has not occurred.
+
+## Sprint 7 release — CI/CD
+
+- [x] Preserve clean deployed baseline `82cb9ea`; inspect existing deployment, backup and migration procedures.
+- [x] Add PR/main/manual CI using Node 22, locked install, cached npm and all existing verification scripts; stable `Planner verification` check, read-only permissions and pinned actions.
+- [x] Add installed server-side controller and disabled-by-default systemd definitions: lock, exact CI/merged-PR gate, clean fast-forward checkout, isolated image build and versioned deployment state.
+- [x] Preserve previous image, verify live/quiesced SQLite backups, reuse migration tool and replace only Planner; fail closed with a recovery latch after migration/startup failure.
+- [x] Document feature branches, GitHub protection/plan limitations, read-only credentials, installation, adoption, check-only/no-change/failure tests and database-compatible rollback in [CI_CD.md](CI_CD.md).
+- [x] 124/124 repository tests (including 16 isolated controller scenarios), lint, typecheck, formatting and production build; no schema or application changes.
+- [ ] Manually configure GitHub protections/credentials and confirm an actual Actions run.
+- [ ] Manually install reviewed files on Ubuntu with timer disabled; verify systemd/credentials, exact baseline, restored-copy rehearsal and controlled deployment/no-change test before enabling.
+
+No application/database migration, production access, installation, commit, push or deployment in this change. Controller/units are explicitly installed policy; future versions require manual review/reinstallation.
 
 ## Sprint 7 — incremental Analytics and Calendar work
 

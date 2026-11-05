@@ -1,0 +1,11 @@
+[Unit]
+Description=Check Planner main for a tested release every five minutes
+
+[Timer]
+OnBootSec=5min
+OnUnitInactiveSec=5min
+AccuracySec=30s
+Unit=planner-deploy.service
+
+[Install]
+WantedBy=timers.target

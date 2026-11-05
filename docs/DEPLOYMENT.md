@@ -1,5 +1,7 @@
 # Planner deployment — mblx-home-server
 
+For the optional, initially disabled server-side release poller and GitHub PR/CI workflow, see [CI/CD setup and recovery](CI_CD.md). The user reports Sprint 7 is deployed; CI/CD setup is a separate manual operation. This change introduces no schema migration and does not install or activate anything on Ubuntu. The manual procedures below remain the fallback and restore reference.
+
 Prepared configuration; actual Ubuntu/Tailscale/iPhone deployment has not been performed. One container serves UI and API; SQLite stays on host local disk. Do not run commands until their preflight conditions pass. These commands affect only the `planner` Compose project; never run global Docker prune, restart Docker, reset Serve, or change another application's mounts/ports.
 
 Known from your server check (not independently verified): x86_64, Docker 29.2.1, Compose 5.1.0, 7.7 GiB RAM with approximately 4.9 GiB available, 4 GiB swap with 2.4 GiB used, port 3100 apparently free, and Tailscale not installed. Verify disk space/filesystem and exact Ubuntu release. Existing swap use makes a quiet build window advisable; do not tune or restart other services.
