@@ -1,0 +1,26 @@
+[Unit]
+Description=Deploy tested Planner main commits (Planner only)
+Wants=network-online.target
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+User=virain
+Group=virain
+SupplementaryGroups=docker
+WorkingDirectory=/home/virain/planner
+ExecStart=/usr/bin/python3 /usr/local/lib/planner-deploy/planner-deploy.py
+LoadCredential=github-token:/etc/planner-deploy/github-token
+Environment=HOME=/home/virain
+Environment=GIT_TERMINAL_PROMPT=0
+Environment="GIT_SSH_COMMAND=/usr/bin/ssh -i /home/virain/.ssh/planner_deploy -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes"
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+UMask=0077
+TimeoutStartSec=60min
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/virain/planner /home/virain/.local/state/planner-deploy
+# Docker access is root-equivalent despite these process-level restrictions.
+# No Restart=: pending deployments require operator recovery, not repeated migrations.
