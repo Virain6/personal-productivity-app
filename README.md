@@ -56,3 +56,5 @@ The Habits migration is applied automatically when the database opens, or with t
 `src/features` contains Home/timer UI; `src/server/services` contains domain rules; `src/server/db` contains schema/connection; `drizzle` contains versioned migrations. `PROJECT_PLAN.md` preserves the long-term specification with the latest calendar-first habit clarification; `docs` records current scope, architecture, decisions and verification.
 
 Deployment preparation is available in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md): one non-root Next.js standalone container, loopback port 3100, persistent SQLite, backup-before-migration, verified snapshot restore and private Tailscale HTTPS. PWA manifest/icons are included; no offline writes. Actual server deployment, Linux container persistence and real-device installation remain unverified. APP_ORIGIN is an origin guard, not authentication; owner-only Tailscale policy is required before personal use.
+
+<!-- CI/CD deployment verification test -->
